@@ -1,0 +1,11 @@
+{
+    "name": "madeline",
+    "version": "1.0.0",
+    "description": "First discord bot",
+    "main": "index.js",
+    "author": "Malty",
+    "dependencies": {
+        "discord.js": "^12.2.0",
+        "r2": "^2.0.1"
+    }
+}
