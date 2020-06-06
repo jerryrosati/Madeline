@@ -42,7 +42,6 @@ client.on('message', message => {
 
     const command = client.commands.get(commandName);
 
-    message.attachments.first().url
     if (command.args && !args.length) {
         let reply = `You didn't provide any arguments, ${message.author}!`;
 
