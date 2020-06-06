@@ -4,6 +4,7 @@ module.exports = {
     name: 'embedtest',
     description: 'Fake embed',
     args: false,
+
     execute(message, args) {
         const exampleEmbed = new Discord.MessageEmbed()
             .setColor('#0099ff')

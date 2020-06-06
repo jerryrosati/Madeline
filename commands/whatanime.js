@@ -5,11 +5,25 @@ module.exports = {
     name: 'whatanime',
     description: 'Check what anime with a gif or image.',
     args: false,
-    execute(message, args) {
-        const attachedImageUrl = message.attachments.first().url;
-        const traceUrl = `https://trace.moe/api/search?url=${attachedImageUrl}`;
-        console.log(attachedImageUrl)
 
+    execute(message, args) {
+        // Exit if message doesn't have any attachments.
+        if (!message.attachments.array().length) {
+            message.reply(`Couldn't search :( Need an image attachment.`)
+            return;
+        }
+
+        const attachedImageUrl = message.attachments.first().url;
+        console.log(attachedImageUrl);
+
+        // Exit if attachment is a gif.
+        if (attachedImageUrl.endsWith(".gif")) {
+            message.reply("Right now I only handle still images :(");
+            return;
+        }
+
+        // Search trace.moe for the anime and send an embed with the anime information to the channel.
+        const traceUrl = `https://trace.moe/api/search?url=${attachedImageUrl}`;
         const getData = async url => {
             try {
                 const response = await r2(url).json;
@@ -25,6 +39,7 @@ module.exports = {
                 message.reply(`Anime is: ${englishTitle} (${similarity}% confidence)`);
                 message.channel.send(exampleEmbed);
             } catch (error) {
+                message.reply("Couldn't retrieve anime information :(");
                 console.log(error);
             }
         };

@@ -28,7 +28,7 @@ client.once('ready', () => {
     console.log('Ready!');
 });
 
-// Log any message send inside a channel the bot has access to, log it
+// Execute commands
 client.on('message', message => {
     if (!message.content.startsWith(prefix) || message.author.bot) return;
 

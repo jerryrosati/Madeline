@@ -5,6 +5,7 @@ module.exports = {
     name: 'anime',
     description: 'Search for anime',
     args: true,
+    usage: "<anime to search for>",
 
     execute(message, args) {
         // Anilist query
