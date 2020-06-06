@@ -17,8 +17,7 @@ client.commands = new Discord.Collection();
 // Saves an array of all files in the commands folder that end in '.js'.
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
 
-for (const file of commandFiles)
-{
+for (const file of commandFiles) {
     const command = require(`./commands/${file}`);
     client.commands.set(command.name, command);
 }
@@ -36,32 +35,27 @@ client.on('message', message => {
     const args = message.content.slice(prefix.length).split(/ +/)
     const commandName = args.shift().toLowerCase();
 
-    if (!client.commands.has(commandName))
-    {
+    if (!client.commands.has(commandName)) {
         message.reply('Unknown command');
         return;
     };
 
     const command = client.commands.get(commandName);
 
-    if (command.args && !args.length)
-    {
+    message.attachments.first().url
+    if (command.args && !args.length) {
         let reply = `You didn't provide any arguments, ${message.author}!`;
 
-        if (command.usage)
-        {
+        if (command.usage) {
             reply += `\nThe proper usage would be: \`${prefix}${command.name} ${command.usage}\``;
         }
 
         return message.channel.send(reply);
     }
 
-    try
-    {
+    try {
         command.execute(message, args);
-    }
-    catch (error)
-    {
+    } catch (error) {
         console.error(error);
         message.reply('There was an error trying to execute that command!');
     }

@@ -67,8 +67,7 @@ module.exports = {
         
         fetch(url, options)
             .then(response => response.json().then(json => response.ok ? json : Promise.reject(json)))
-            .then(data => 
-            {
+            .then(data => {
                 console.log(JSON.stringify(data, null, 3));
                 const series = data.data.Page.media[0];
                             
@@ -87,7 +86,6 @@ module.exports = {
                         {name: 'Studio', value: series.studios.nodes.map(studio => studio.name), inline: true}
                     );
                 message.channel.send(exampleEmbed);
-            })
-            .catch(error => console.error(error));
+            }).catch(error => console.error(error));
     },
 };
