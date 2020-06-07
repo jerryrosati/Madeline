@@ -9,6 +9,7 @@ module.exports = {
     argsOptional: true,
 
     execute(message, args) {
+        let basisFetchPromise;
 
         // Anilist query url
         const url = 'https://graphql.anilist.co';
@@ -36,19 +37,17 @@ module.exports = {
             }
             const animeTitle = args.slice(1).join(" ");
             console.log(animeTitle);
-            fetchBasisAnimeInfo(animeTitle, url)
+            basisFetchPromise = fetchBasisAnimeInfo(animeTitle, url)
                 .then(data => {
-                    console.log(JSON.stringify(data, null, 3));
+                    console.log(`Basis Anime: ${JSON.stringify(data, null, 3)}`);
                     const series = data.data.Page.media[0];
-                    const tags = series.tags;
-                    const tagsString = tags.map(tag => tag.name).join(",");
-                    console.log(tagsString);
-                    message.channel.send(`Tags for ${series.title.romaji}: ${tagsString}`);
-                }).catch(error => {
-                    console.error(error);
-                    message.reply("Failed to get anime :(");
+                    const tagsJson = series.tags;
+                    const tags = tagsJson
+                        .filter(tag => tag.rank >= 80)
+                        .flatMap(tag => tag.name);
+                    console.log(tags);
+                    return tags;
                 });
-            return;
         } else {
             // Exit if the user has provided an incorrect argument.
             utils.reportCommandUsageError(this,
@@ -59,29 +58,38 @@ module.exports = {
 
         // Anilist query
         var query = `
-        query ($popularity: Int) {
-            Media (popularity: $popularity, type: ANIME) {
-                id
-                title {
-                    romaji
-                }
-                coverImage {
-                    extraLarge
-                    color
-                }
-                bannerImage
-                description(asHtml: false)
-                episodes
-                status
-                genres
-                season
-                seasonYear
-                studios(isMain: true) {
-                    nodes {
-                        name
-                    }
-                }
+        query ($tags: [String], $page: Int, $perPage: Int) {
+          Page (page: $page, perPage: $perPage) {
+            pageInfo {
+              total
+              currentPage
+              lastPage
+              hasNextPage
+              perPage
             }
+            media (tag_in: $tags, type: ANIME) {
+              id
+              title {
+                romaji
+              }
+              coverImage {
+                  extraLarge
+                  color
+              }
+              bannerImage
+              description(asHtml: false)
+              episodes
+              status
+              genres
+              season
+              seasonYear
+              studios(isMain: true) {
+                  nodes {
+                      name
+                  }
+              }
+            }
+          }
         }
         `;
 
@@ -89,28 +97,30 @@ module.exports = {
         let randomNum = Math.floor(Math.random() * (4000 + 1) + 1);
         console.log(`Random Number: ${randomNum}`);
 
-        // Anilist query variables
-        var variables = {
-            popularity: randomNum,
-        };
-        
-        let options = {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                },
-                body: JSON.stringify({
-                    query: query,
-                    variables: variables
-                })
-            };
-        
         // Fetch the random anime info and send it to the channel.
-        fetchInfo(url, options)
-            .then(data => {
-                console.log(JSON.stringify(data, null, 3));
-                const series = data.data.Media;
+        basisFetchPromise
+            .then(tags => {
+                let variables = {
+                    tags: tags,
+                    page: 1,
+                    perPage: 3
+                };
+
+                let options = {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            query: query,
+                            variables: variables
+                        })
+                    };
+                return fetchInfo(url, options);
+            }).then(data => {
+                console.log(`Result anime: ${JSON.stringify(data, null, 3)}`);
+                const series = data.data.Page.media[0];
                 utils.sendAnimeSeriesEmbed(series, message);
             }).catch(error => {
                 console.error(error);
@@ -144,6 +154,7 @@ function fetchBasisAnimeInfo(animeTitle, url) {
                     }
                     tags {
                         name
+                        rank
                     }
                 }
             }
