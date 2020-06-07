@@ -6,9 +6,13 @@ module.exports = {
     description: 'Get a random anime suggestion',
     usage: "[genre genres... | anime anime_title]",
     args: true,
-    args_optional: true,
+    argsOptional: true,
 
     execute(message, args) {
+
+        // Anilist query url
+        const url = 'https://graphql.anilist.co';
+
         if (!args.length) {
 
         } else if (args[0] === 'genre') {
@@ -32,6 +36,19 @@ module.exports = {
             }
             const animeTitle = args.slice(1).join(" ");
             console.log(animeTitle);
+            fetchBasisAnimeInfo(animeTitle, url)
+                .then(data => {
+                    console.log(JSON.stringify(data, null, 3));
+                    const series = data.data.Page.media[0];
+                    const tags = series.tags;
+                    console.log(tags);
+                    const tagsString = tags.map(tag => tag.name).join(",");
+                    console.log(tagsString);
+                    message.channel.send(`Tags for ${series.title.romaji}: ${tagsString}`);
+                }).catch(error => {
+                    console.error(error);
+                    message.reply("Failed to get anime :(");
+                });
             return;
         } else {
             // Exit if the user has provided an incorrect argument.
@@ -78,9 +95,7 @@ module.exports = {
             popularity: randomNum,
         };
         
-        // Anilist query url
-        var url = 'https://graphql.anilist.co',
-            options = {
+        let options = {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -92,29 +107,72 @@ module.exports = {
                 })
             };
         
-        fetch(url, options)
-            .then(response => response.json().then(json => response.ok ? json : Promise.reject(json)))
+        // Fetch the random anime info and send it to the channel.
+        fetchInfo(url, options)
             .then(data => {
                 console.log(JSON.stringify(data, null, 3));
                 const series = data.data.Media;
-                            
-                const exampleEmbed = new Discord.MessageEmbed()
-                    .setColor(series.coverImage.color)
-                    .setThumbnail(series.coverImage.extraLarge)
-                    .setTitle(series.title.romaji)
-                    .setURL(`https://anilist.co/anime/${series.id}`)
-                    .setDescription(series.description.replace(/(<([^>]+)>)/g, "")) // Remove html tags from the description.
-                    .setImage(series.bannerImage)
-                    .addFields(
-                        {name: 'Episodes', value: series.episodes, inline: true},
-                        {name: 'Status', value: utils.capitalizeFirstLetter(series.status), inline: true},
-                        {name: 'Season', value: `${utils.capitalizeFirstLetter(series.season)} ${series.seasonYear}`, inline: true},
-                        {name: 'Genres', value: series.genres, inline: true},
-                    );
-                message.channel.send(exampleEmbed);
+                utils.sendAnimeSeriesEmbed(series, message);
             }).catch(error => {
                 console.error(error);
-                message.channel.send("Failed to get anime :(");
+                message.reply("Failed to get anime :(");
             });
     },
 };
+
+function fetchBasisAnimeInfo(animeTitle, url) {
+    // Anilist query
+    const basisQuery = `
+        query ($page: Int, $perPage: Int, $search: String) {
+            Page (page: $page, perPage: $perPage) {
+                pageInfo {
+                    total
+                    currentPage
+                    lastPage
+                    hasNextPage
+                    perPage
+                }
+                media (search: $search, type: ANIME) {
+                    id
+                    title {
+                        romaji
+                    }
+                    tags {
+                        name
+                    }
+                }
+            }
+        }`;
+
+    const variables = {
+        search: animeTitle,
+        page: 1,
+        perPage: 3
+    };
+
+    const options = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+        },
+        body: JSON.stringify({
+            query: basisQuery,
+            variables: variables
+        })
+    };
+
+    return fetchInfo(url, options);    
+}
+
+/**
+ * Fetches info about an anime from Anilist.
+ * 
+ * @param {String} url 
+ * @param {*} options 
+ */
+function fetchInfo(url, options) {
+    return fetch(url, options)
+        .then(response => response.json()
+            .then(json => response.ok ? json : Promise.reject(json)));
+}
