@@ -41,7 +41,6 @@ module.exports = {
                     console.log(JSON.stringify(data, null, 3));
                     const series = data.data.Page.media[0];
                     const tags = series.tags;
-                    console.log(tags);
                     const tagsString = tags.map(tag => tag.name).join(",");
                     console.log(tagsString);
                     message.channel.send(`Tags for ${series.title.romaji}: ${tagsString}`);
@@ -120,6 +119,12 @@ module.exports = {
     },
 };
 
+/**
+ * Fetches info for the anime that we're basing the random anime off of.
+ * 
+ * @param {String} animeTitle The title of the basis anime.
+ * @param {String} url The Anilist query url.
+ */
 function fetchBasisAnimeInfo(animeTitle, url) {
     // Anilist query
     const basisQuery = `
@@ -168,8 +173,8 @@ function fetchBasisAnimeInfo(animeTitle, url) {
 /**
  * Fetches info about an anime from Anilist.
  * 
- * @param {String} url 
- * @param {*} options 
+ * @param {String} url The Anilist query url.
+ * @param {*} options The query options.
  */
 function fetchInfo(url, options) {
     return fetch(url, options)
