@@ -4,9 +4,43 @@ const utils = require('./../utils.js');
 module.exports = {
     name: 'random',
     description: 'Get a random anime suggestion',
-    args: false,
+    usage: "[genre genres... | anime anime_title]",
+    args: true,
+    args_optional: true,
 
     execute(message, args) {
+        if (!args.length) {
+
+        } else if (args[0] === 'genre') {
+            // Exit if the user hasn't provided a genre.
+            if (args.length < 2) {
+                utils.reportCommandUsageError(this,
+                    message,
+                    "Please provide at least one genre");
+                return;
+            }
+            const genreList = args.slice(1).join(",");
+            console.log(genreList);
+            return;
+        } else if (args[0] === 'anime') {
+            // Exit if the user hasn't provided an anime title.
+            if (args.length < 2) {
+                utils.reportCommandUsageError(this,
+                    message,
+                    "Please provide an anime title");
+                return;
+            }
+            const animeTitle = args.slice(1).join(" ");
+            console.log(animeTitle);
+            return;
+        } else {
+            // Exit if the user has provided an incorrect argument.
+            utils.reportCommandUsageError(this,
+                message,
+                `Usage is incorrect`);
+                return;
+        }
+
         // Anilist query
         var query = `
         query ($popularity: Int) {

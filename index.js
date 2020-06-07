@@ -2,13 +2,11 @@
  * Madeline the discord bot
  */
 
- const fs = require('fs');
-
- // Require auth.json
+const fs = require('fs');
+const utils = require('./utils.js');
 const { prefix, token } = require('./config.json');
-
-// Require the discord.js module
 const Discord = require('discord.js');
+
 
 // Create a new discord client
 const client = new Discord.Client();
@@ -42,14 +40,10 @@ client.on('message', message => {
 
     const command = client.commands.get(commandName);
 
-    if (command.args && !args.length) {
-        let reply = `You didn't provide any arguments, ${message.author}!`;
-
-        if (command.usage) {
-            reply += `\nThe proper usage would be: \`${prefix}${command.name} ${command.usage}\``;
-        }
-
-        return message.channel.send(reply);
+    if (command.args && !command.args_optional && !args.length) {
+        utils.reportCommandUsageError(command,
+            message, 
+            `You didn't provide any arguments`);
     }
 
     try {
