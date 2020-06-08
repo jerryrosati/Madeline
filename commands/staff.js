@@ -69,20 +69,18 @@ module.exports = {
                 if (desc.length > 2048) {
                     desc = desc.slice(0, 2045) + "...";
                 }
+
+                let roles = staff.characters.edges.slice(0, 5) 
+                    .flatMap(edge => edge.name.full)
+                    .join("\n");
                             
                 const exampleEmbed = new Discord.MessageEmbed()
                     .setTitle(`${staff.name.full} ( ${staff.name.native} )`)
                     .setURL(staff.siteUrl)
-                    //description is the same
-                    .setDescription(desc.replace(/(<([^>]+)>)/g, "")) // Remove html tags from the description.
-                    //this might also be picture
+                    .setDescription(desc.replace(/(<([^>]+)>)/g, ""))
                     .setThumbnail(staff.image.large)
                     .addFields(
-                        //birthplace ?
-                        //birthday ?
-                        //maybe several roles 
-                        {name: 'Roles', value: character, inline: true},
-                        //{name: 'Social Media', value: series.//socialMedia}              
+                        {name: 'Roles', value: roles, inline: true},          
                     );
                 message.channel.send(exampleEmbed);
             }).catch(error => console.error(error));
