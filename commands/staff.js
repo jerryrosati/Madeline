@@ -5,6 +5,7 @@ module.exports = {
     name: 'staff',
     description: 'Search for staff',
     args: true,
+    argsOptional: false,
     usage: "<staff to search for>",
 
     execute(message, args) {
@@ -13,25 +14,25 @@ module.exports = {
         query ($name: String) {
             Staff(search:$name) {
                 name {
-                full
-                native
+                    full
+                    native
                 }
                 siteUrl
                 description
                 image {
-                large
+                    large
                 }
-                characters(sort: SEARCH_MATCH) {
-                edges {
-                    id
-                    node {
-                    id
-                    name {
-                        full
+                characters(sort: FAVOURITES_DESC) {
+                    edges {
+                        id
+                        node {
+                            id
+                            name {
+                                full
+                            }
+                            siteUrl
+                        }
                     }
-                    siteUrl
-                    }
-                }
                 }
             }
         }
@@ -60,21 +61,27 @@ module.exports = {
             .then(response => response.json().then(json => response.ok ? json : Promise.reject(json)))
             .then(data => {
                 console.log(JSON.stringify(data, null, 3));
-                const staff = data.data.staff;
+                const staff = data.data.Staff;
+                const character = staff.characters.edges[0].node.name.full;
+                console.log(character);
+
+                let desc = staff.description;
+                if (desc.length > 2048) {
+                    desc = desc.slice(0, 2045) + "...";
+                }
                             
                 const exampleEmbed = new Discord.MessageEmbed()
-                    .setTitle(staff.name.full)
-                    .setAuthor(staff.name.native)
-                    .setURL(`https://anilist.co/staff/${staff.id}`)
+                    .setTitle(`${staff.name.full} ( ${staff.name.native} )`)
+                    .setURL(staff.siteUrl)
                     //description is the same
-                    .setDescription(staff.description.replace(/(<([^>]+)>)/g, "")) // Remove html tags from the description.
+                    .setDescription(desc.replace(/(<([^>]+)>)/g, "")) // Remove html tags from the description.
                     //this might also be picture
                     .setThumbnail(staff.image.large)
                     .addFields(
                         //birthplace ?
                         //birthday ?
                         //maybe several roles 
-                        {name: 'Roles', value: staff.characters.name.full, inline: true},
+                        {name: 'Roles', value: character, inline: true},
                         //{name: 'Social Media', value: series.//socialMedia}              
                     );
                 message.channel.send(exampleEmbed);
