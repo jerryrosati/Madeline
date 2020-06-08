@@ -1,3 +1,6 @@
+/**
+ * Staff command
+ */
 const Discord = require('discord.js');
 const utils = require('./../utils.js');
 
@@ -78,7 +81,7 @@ module.exports = {
 
                 let characters = staff.characters.edges;
                             
-                const exampleEmbed = new Discord.MessageEmbed()
+                const embed = new Discord.MessageEmbed()
                     .setTitle(`${staff.name.full} ( ${staff.name.native} )`)
                     .setURL(staff.siteUrl)
                     .setDescription(desc.replace(/(<([^>]+)>)/g, ""))
@@ -89,11 +92,11 @@ module.exports = {
                         .flatMap(edge => `[${edge.node.name.full}](${edge.node.siteUrl}) | [${edge.node.media.nodes[0].title.romaji}](${edge.node.media.nodes[0].siteUrl})`)
                         .join("\n");
 
-                    exampleEmbed.addFields(
+                    embed.addFields(
                         {name: 'Roles', value: roles, inline: true},          
                     );
                 }
-                message.channel.send(exampleEmbed);
+                message.channel.send(embed);
             }).catch(error => console.error(error));
     },
 };
