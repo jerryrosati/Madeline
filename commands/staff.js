@@ -30,6 +30,14 @@ module.exports = {
                             name {
                                 full
                             }
+                            media(sort: POPULARITY_DESC) {
+                                nodes {
+                                    title {
+                                        romaji
+                                    }
+                                    siteUrl
+                                }
+                            }
                             siteUrl
                         }
                     }
@@ -62,26 +70,29 @@ module.exports = {
             .then(data => {
                 console.log(JSON.stringify(data, null, 3));
                 const staff = data.data.Staff;
-                const character = staff.characters.edges[0].node.name.full;
-                console.log(character);
 
                 let desc = staff.description;
                 if (desc.length > 2048) {
                     desc = desc.slice(0, 2045) + "...";
                 }
 
-                let roles = staff.characters.edges.slice(0, 5) 
-                    .flatMap(edge => edge.node.name.full)
-                    .join("\n");
+                let characters = staff.characters.edges;
                             
                 const exampleEmbed = new Discord.MessageEmbed()
                     .setTitle(`${staff.name.full} ( ${staff.name.native} )`)
                     .setURL(staff.siteUrl)
                     .setDescription(desc.replace(/(<([^>]+)>)/g, ""))
-                    .setThumbnail(staff.image.large)
-                    .addFields(
+                    .setThumbnail(staff.image.large);
+
+                if (characters.length) {
+                    let roles = characters.slice(0, 5) 
+                        .flatMap(edge => `[${edge.node.name.full}](${edge.node.siteUrl}) | [${edge.node.media.nodes[0].title.romaji}](${edge.node.media.nodes[0].siteUrl})`)
+                        .join("\n");
+
+                    exampleEmbed.addFields(
                         {name: 'Roles', value: roles, inline: true},          
                     );
+                }
                 message.channel.send(exampleEmbed);
             }).catch(error => console.error(error));
     },
