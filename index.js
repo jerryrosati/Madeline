@@ -1,7 +1,6 @@
 /**
  * Madeline the discord bot
  */
-
 const fs = require('fs');
 const utils = require('./utils.js');
 const { prefix, token } = require('./config.json');
@@ -40,10 +39,11 @@ client.on('message', message => {
 
     const command = client.commands.get(commandName);
 
-    if (command.args && !command.args_optional && !args.length) {
+    if (command.args && !command.argsOptional && !args.length) {
         utils.reportCommandUsageError(command,
             message, 
             `You didn't provide any arguments`);
+        return;
     }
 
     try {

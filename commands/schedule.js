@@ -1,15 +1,25 @@
+/**
+ * Schedule command. Used to schedule schedule an event for a specific date/time and 
+ * notify people at that time.
+ * 
+ * Usage: !schedule date (as MM/DD/YYYY) time (as HH:mm in 24-hour time)
+ * Example: !schedule 6/6/2020 16:30
+ */
 const schedule  = require('node-schedule');
 const utils = require('./../utils.js');
 
 module.exports = {
     name: 'schedule',
     description: 'Schedule a thing.',
+    usage: `date (as MM/DD/YYYY) time (as HH:mm in 24-hour time)`,
     args: true,
-    usage: `<date (in format MM/DD/YYYY)> <time (HH:mm)>`,
+    argsOptional: false,
 
     execute(message, args) {
         if (args.length < 2) {
-            message.reply(`Wrong number of arguments; the proper usage is \`!schedule ${this.usage}\``);
+            utils.reportCommandUsageError(this,
+                message,
+                "Wrong number of arguments");
             return;
         }
 
@@ -25,7 +35,7 @@ module.exports = {
 
         let job = schedule.scheduleJob(date, () => {
             console.log(date.toString());
-            message.channel.send("<@377193147203059713> This is a reminder");
+            message.channel.send("@377193147203059713 This is a reminder");
         })
     },
 };

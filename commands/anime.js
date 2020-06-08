@@ -1,11 +1,17 @@
-const Discord = require('discord.js');
+/**
+ * Anime command. Used to search anilist for an anime.
+ * 
+ * Usage: !anime anime_title (can be partial)
+ * Example: !anime kaguya
+ */
 const utils = require('./../utils.js');
 
 module.exports = {
     name: 'anime',
     description: 'Search for anime',
+    usage: "anime_title (can be partial)",
     args: true,
-    usage: "<anime to search for>",
+    argsOptional: false,
 
     execute(message, args) {
         // Anilist query
@@ -66,27 +72,17 @@ module.exports = {
                 })
             };
         
+        // Fetch the anime information and send an embed to the channel
         fetch(url, options)
-            .then(response => response.json().then(json => response.ok ? json : Promise.reject(json)))
+            .then(response => response.json()
+                .then(json => response.ok ? json : Promise.reject(json)))
             .then(data => {
                 console.log(JSON.stringify(data, null, 3));
                 const series = data.data.Page.media[0];
-                            
-                const exampleEmbed = new Discord.MessageEmbed()
-                    .setColor(series.coverImage.color)
-                    .setThumbnail(series.coverImage.extraLarge)
-                    .setTitle(series.title.romaji)
-                    .setURL(`https://anilist.co/anime/${series.id}`)
-                    .setDescription(series.description.replace(/(<([^>]+)>)/g, "")) // Remove html tags from the description.
-                    .setImage(series.bannerImage)
-                    .addFields(
-                        {name: 'Episodes', value: series.episodes, inline: true},
-                        {name: 'Status', value: utils.capitalizeFirstLetter(series.status), inline: true},
-                        {name: 'Season', value: `${utils.capitalizeFirstLetter(series.season)} ${series.seasonYear}`, inline: true},
-                        {name: 'Genres', value: series.genres, inline: true},
-                        {name: 'Studio', value: series.studios.nodes.map(studio => studio.name), inline: true}
-                    );
-                message.channel.send(exampleEmbed);
-            }).catch(error => console.error(error));
+                utils.sendAnimeSeriesEmbed(series, message);    
+            }).catch(error => {
+                console.error(error);
+                message.reply("Failed to get anime :(");
+            });
     },
 };

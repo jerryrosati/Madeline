@@ -6,9 +6,14 @@ module.exports = {
     description: 'Get a random anime suggestion',
     usage: "[genre genres... | anime anime_title]",
     args: true,
-    args_optional: true,
+    argsOptional: true,
 
     execute(message, args) {
+        let basisFetchPromise;
+
+        // Anilist query url
+        const url = 'https://graphql.anilist.co';
+
         if (!args.length) {
 
         } else if (args[0] === 'genre') {
@@ -32,7 +37,17 @@ module.exports = {
             }
             const animeTitle = args.slice(1).join(" ");
             console.log(animeTitle);
-            return;
+            basisFetchPromise = fetchBasisAnimeInfo(animeTitle, url)
+                .then(data => {
+                    console.log(`Basis Anime: ${JSON.stringify(data, null, 3)}`);
+                    const series = data.data.Page.media[0];
+                    const tagsJson = series.tags;
+                    const tags = tagsJson
+                        .filter(tag => tag.rank >= 80)
+                        .flatMap(tag => tag.name);
+                    console.log(tags);
+                    return tags;
+                });
         } else {
             // Exit if the user has provided an incorrect argument.
             utils.reportCommandUsageError(this,
@@ -43,29 +58,38 @@ module.exports = {
 
         // Anilist query
         var query = `
-        query ($popularity: Int) {
-            Media (popularity: $popularity, type: ANIME) {
-                id
-                title {
-                    romaji
-                }
-                coverImage {
-                    extraLarge
-                    color
-                }
-                bannerImage
-                description(asHtml: false)
-                episodes
-                status
-                genres
-                season
-                seasonYear
-                studios(isMain: true) {
-                    nodes {
-                        name
-                    }
-                }
+        query ($tags: [String], $page: Int, $perPage: Int) {
+          Page (page: $page, perPage: $perPage) {
+            pageInfo {
+              total
+              currentPage
+              lastPage
+              hasNextPage
+              perPage
             }
+            media (tag_in: $tags, type: ANIME) {
+              id
+              title {
+                romaji
+              }
+              coverImage {
+                  extraLarge
+                  color
+              }
+              bannerImage
+              description(asHtml: false)
+              episodes
+              status
+              genres
+              season
+              seasonYear
+              studios(isMain: true) {
+                  nodes {
+                      name
+                  }
+              }
+            }
+          }
         }
         `;
 
@@ -73,48 +97,98 @@ module.exports = {
         let randomNum = Math.floor(Math.random() * (4000 + 1) + 1);
         console.log(`Random Number: ${randomNum}`);
 
-        // Anilist query variables
-        var variables = {
-            popularity: randomNum,
-        };
-        
-        // Anilist query url
-        var url = 'https://graphql.anilist.co',
-            options = {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                },
-                body: JSON.stringify({
-                    query: query,
-                    variables: variables
-                })
-            };
-        
-        fetch(url, options)
-            .then(response => response.json().then(json => response.ok ? json : Promise.reject(json)))
-            .then(data => {
-                console.log(JSON.stringify(data, null, 3));
-                const series = data.data.Media;
-                            
-                const exampleEmbed = new Discord.MessageEmbed()
-                    .setColor(series.coverImage.color)
-                    .setThumbnail(series.coverImage.extraLarge)
-                    .setTitle(series.title.romaji)
-                    .setURL(`https://anilist.co/anime/${series.id}`)
-                    .setDescription(series.description.replace(/(<([^>]+)>)/g, "")) // Remove html tags from the description.
-                    .setImage(series.bannerImage)
-                    .addFields(
-                        {name: 'Episodes', value: series.episodes, inline: true},
-                        {name: 'Status', value: utils.capitalizeFirstLetter(series.status), inline: true},
-                        {name: 'Season', value: `${utils.capitalizeFirstLetter(series.season)} ${series.seasonYear}`, inline: true},
-                        {name: 'Genres', value: series.genres, inline: true},
-                    );
-                message.channel.send(exampleEmbed);
+        // Fetch the random anime info and send it to the channel.
+        basisFetchPromise
+            .then(tags => {
+                let variables = {
+                    tags: tags,
+                    page: 1,
+                    perPage: 3
+                };
+
+                let options = {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            query: query,
+                            variables: variables
+                        })
+                    };
+                return fetchInfo(url, options);
+            }).then(data => {
+                console.log(`Result anime: ${JSON.stringify(data, null, 3)}`);
+                const series = data.data.Page.media[0];
+                utils.sendAnimeSeriesEmbed(series, message);
             }).catch(error => {
                 console.error(error);
-                message.channel.send("Failed to get anime :(");
+                message.reply("Failed to get anime :(");
             });
     },
 };
+
+/**
+ * Fetches info for the anime that we're basing the random anime off of.
+ * 
+ * @param {String} animeTitle The title of the basis anime.
+ * @param {String} url The Anilist query url.
+ */
+function fetchBasisAnimeInfo(animeTitle, url) {
+    // Anilist query
+    const basisQuery = `
+        query ($page: Int, $perPage: Int, $search: String) {
+            Page (page: $page, perPage: $perPage) {
+                pageInfo {
+                    total
+                    currentPage
+                    lastPage
+                    hasNextPage
+                    perPage
+                }
+                media (search: $search, type: ANIME) {
+                    id
+                    title {
+                        romaji
+                    }
+                    tags {
+                        name
+                        rank
+                    }
+                }
+            }
+        }`;
+
+    const variables = {
+        search: animeTitle,
+        page: 1,
+        perPage: 3
+    };
+
+    const options = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+        },
+        body: JSON.stringify({
+            query: basisQuery,
+            variables: variables
+        })
+    };
+
+    return fetchInfo(url, options);    
+}
+
+/**
+ * Fetches info about an anime from Anilist.
+ * 
+ * @param {String} url The Anilist query url.
+ * @param {*} options The query options.
+ */
+function fetchInfo(url, options) {
+    return fetch(url, options)
+        .then(response => response.json()
+            .then(json => response.ok ? json : Promise.reject(json)));
+}
