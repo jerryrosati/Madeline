@@ -71,7 +71,7 @@ module.exports = {
                 }
 
                 let roles = staff.characters.edges.slice(0, 5) 
-                    .flatMap(edge => edge.name.full)
+                    .flatMap(edge => edge.node.name.full)
                     .join("\n");
                             
                 const exampleEmbed = new Discord.MessageEmbed()
