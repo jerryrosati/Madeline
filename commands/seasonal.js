@@ -1,15 +1,15 @@
 /**
- * Staff command
+ * Seasonal command
  */
 const Discord = require('discord.js');
 const utils = require('./../utils.js');
 
 module.exports = {
-    name: 'seasonal',
+    name: 'season',
     description: 'Search for seasonal anime',
-    args: false,
-    argsOptional: false,
-    usage: "<seasonal anime to search for>",
+    args: true,
+    argsOptional: true,
+    usage: "[season] [year]",
 
     execute(message, args) {
         // Anilist query
@@ -41,15 +41,19 @@ module.exports = {
                     }
                     episodes
                     siteUrl
+                    bannerImage
                 }
             }
         }
         `;
 
+        // TODO: 6/11/2020 Update default value to current season.
+        let season = (args[0] && /fall|spring|winter|summer/.test(args[0].toLowerCase())) ? args[0].toUpperCase() : "SPRING";
+        let year = args[1] ? args[1] : 2020;
+
         var variables = {
-            //TODO: Maybe quotes.
-            season: SPRING,
-            seasonYear: 2020,
+            season: season,
+            seasonYear: year,
         };
         
         // Anilist query url
@@ -70,15 +74,16 @@ module.exports = {
             .then(response => response.json().then(json => response.ok ? json : Promise.reject(json)))
             .then(data => {
                 console.log(JSON.stringify(data, null, 3));
-                //TODO: anime name should be changed to be clearer.
-                const anime = data.data.Page.media[0];
+                const seasonalAnime = data.data.Page.media.slice(0, 11);
+                const seasonalArray = seasonalAnime.flatMap(anime => `[__${anime.title.romaji}__](${anime.siteUrl})\n**Episodes**: ${anime.episodes} | **Start Date**: ${anime.startDate.month}/${anime.startDate.day}/${anime.startDate.year}\n`);
+                const seasonName = utils.capitalizeFirstLetter(variables.season)
 
-                            
+                // TODO: 6/11/2020 Update title style.
                 const embed = new Discord.MessageEmbed()
-                    //TODO: Trying this set out. May not work!
-                    .setTitle(`${variables.season} ( ${variables.seasonYear} )`)
-                    .setURL(anime.siteUrl)
-                    .setDescription(anime.title.romaji);
+                    .setTitle(`${seasonName} ${variables.seasonYear}`)
+                    .setURL(`https://anichart.net/${seasonName}-${variables.seasonYear}`)
+                    .setImage(seasonalAnime[Math.floor(Math.random() * seasonalAnime.length)].bannerImage)
+                    .setDescription(seasonalArray.join("\n"));
 
                 message.channel.send(embed);
             }).catch(error => console.error(error));
