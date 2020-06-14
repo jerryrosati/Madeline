@@ -19,6 +19,9 @@ Madeline's anime- and manga-related commands use [Anilist](https://anilist.co/) 
 - `!pull`: Perform a `git pull` on the repository.
 - `!reload`: Reloads the command files.
 
+### Meme
+- `!bee`: Recite the [Bee Movie](https://trakt.tv/movies/bee-movie-2007) script one word at a time.
+
 ## Invite 
 Madeline is currently in active development and isn't ready to be added to other servers right now.
 
