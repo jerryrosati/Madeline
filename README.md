@@ -25,5 +25,12 @@ Madeline's anime- and manga-related commands use [Anilist](https://anilist.co/) 
 ## Invite 
 Madeline is currently in active development and isn't ready to be added to other servers right now.
 
+## Credits
+- [Discord.js](https://discord.js.org/#/)
+- [r2](https://github.com/mikeal/r2)
+- [node-schedule](https://github.com/node-schedule/node-schedule)
+- [Anilist](https://anilist.co/)
+- [Trace.moe](https://trace.moe/)
+
 ## License
 Madeline uses an MIT license.
