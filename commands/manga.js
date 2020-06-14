@@ -10,30 +10,42 @@ module.exports = {
         // Anilist query
         var query = `
         query ($id: Int, $page: Int, $perPage: Int, $search: String) {
-          Page (page: $page, perPage: $perPage) {
-            pageInfo {
-              total
-              currentPage
-              lastPage
-              hasNextPage
-              perPage
+            Page (page: $page, perPage: $perPage) {
+                pageInfo {
+                    total
+                    currentPage
+                    lastPage
+                    hasNextPage
+                    perPage
+                }
+                media (id: $id, search: $search, type: MANGA) {
+                    id
+                    title {
+                        romaji
+                    }
+                    coverImage {
+                        extraLarge
+                        color
+                    }
+                    bannerImage
+                    description(asHtml: false)
+                    chapters
+                    volumes
+                    status
+                    genres
+                    staff {
+                        edges {
+                            role
+                            node {
+                                name {
+                                    full
+                                }
+                                siteUrl
+                            }
+                        }
+                    }
+                }
             }
-            media (id: $id, search: $search, type: MANGA) {
-              id
-              title {
-                romaji
-              }
-              coverImage {
-                  extraLarge
-                  color
-              }
-              bannerImage
-              description(asHtml: false)
-              chapters
-              status
-              genres
-            }
-          }
         }
         `;
 
@@ -60,22 +72,33 @@ module.exports = {
         
         fetch(url, options)
             .then(response => response.json().then(json => response.ok ? json : Promise.reject(json)))
-            .then(data => {
-                console.log(JSON.stringify(data, null, 3));
-                const series = data.data.Page.media[0];
+            .then(json => {
+                console.log(JSON.stringify(json, null, 3));
+                const series = json.data.Page.media[0];
                             
-                const exampleEmbed = new Discord.MessageEmbed()
+                const embed = new Discord.MessageEmbed()
                     .setColor(series.coverImage.color)
                     .setThumbnail(series.coverImage.extraLarge)
                     .setTitle(series.title.romaji)
-                    .setURL(`https://anilist.co/manga/${series.id}`)
+                    .setURL(series.siteUrl)
                     .setDescription(series.description.replace(/(<([^>]+)>)/g, "")) // Remove html tags from the description.
                     .setImage(series.bannerImage)
                     .addFields(
-                        {name: 'Status', value: utils.capitalizeFirstLetter(series.status), inline: true},
                         {name: 'Genres', value: series.genres, inline: true},
+                        {name: 'Status', value: utils.capitalizeFirstLetter(series.status), inline: true},
                     );
-                message.channel.send(exampleEmbed);
+
+                    if (series.status.toLowerCase() == 'finished') {
+                        embed.addFields(
+                            {name: 'Chapters', value: series.chapters, inline: true},
+                            {name: 'Volumes', value: series.volumes, inline: true}
+                        );
+                    }
+
+                    series.staff.edges.forEach(staff => {
+                        embed.addField(staff.role, `[${staff.node.name.full}](${staff.node.siteUrl})`, true);
+                    });
+                message.channel.send(embed);
             }).catch(error => console.error(error));
     },
 };

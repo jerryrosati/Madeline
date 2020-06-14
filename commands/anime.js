@@ -17,37 +17,37 @@ module.exports = {
         // Anilist query
         var query = `
         query ($id: Int, $page: Int, $perPage: Int, $search: String) {
-          Page (page: $page, perPage: $perPage) {
-            pageInfo {
-              total
-              currentPage
-              lastPage
-              hasNextPage
-              perPage
+            Page (page: $page, perPage: $perPage) {
+                pageInfo {
+                    total
+                    currentPage
+                    lastPage
+                    hasNextPage
+                    perPage
+                }
+                media (id: $id, search: $search, type: ANIME) {
+                    id
+                    title {
+                        romaji
+                    }
+                    coverImage {
+                        extraLarge
+                        color
+                    }
+                    bannerImage
+                    description(asHtml: false)
+                    episodes
+                    status
+                    genres
+                    season
+                    seasonYear
+                    studios(isMain: true) {
+                        nodes {
+                            name
+                        }
+                    }
+                }
             }
-            media (id: $id, search: $search, type: ANIME) {
-              id
-              title {
-                romaji
-              }
-              coverImage {
-                  extraLarge
-                  color
-              }
-              bannerImage
-              description(asHtml: false)
-              episodes
-              status
-              genres
-              season
-              seasonYear
-              studios(isMain: true) {
-                  nodes {
-                      name
-                  }
-              }
-            }
-          }
         }
         `;
 
