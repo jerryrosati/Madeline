@@ -32,6 +32,7 @@ module.exports = {
                     chapters
                     volumes
                     status
+                    siteUrl
                     genres
                     staff {
                         edges {
