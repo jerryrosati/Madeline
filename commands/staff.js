@@ -82,8 +82,10 @@ module.exports = {
                     .setThumbnail(staff.image.large);
 
                 // Limit the description to 2048 characters if there's a description.
-                if (desc && desc.length > 2048) {
-                    desc = desc.slice(0, 2045) + "...";
+                if (desc) {
+                    if (desc.length > 2048) {
+                        desc = desc.slice(0, 2045) + "...";
+                    }
                     embed.setDescription(desc.replace(/(<([^>]+)>)/g, ""));
                 }
 
