@@ -1,5 +1,11 @@
-const Discord = require('discord.js');
-const r2 = require('r2');
+/**
+ * whatanime command. Used to search search Trace.moe for an anime using a picture.
+ * 
+ * Usage: !whatanime (with image attached to discord message)
+ */
+
+const utils = require('./../utils.js');
+const fetch = require("node-fetch");
 
 module.exports = {
     name: 'whatanime',
@@ -22,28 +28,88 @@ module.exports = {
             return;
         }
 
-        // Search trace.moe for the anime and send an embed with the anime information to the channel.
-        const traceUrl = `https://trace.moe/api/search?url=${attachedImageUrl}`;
-        const getData = async url => {
-            try {
-                const response = await r2(url).json;
-                const similarity = response.docs[0].similarity * 100;
-                const englishTitle = response.docs[0].title_english;
-                const exampleEmbed = new Discord.MessageEmbed()
-                    .setColor('#0099ff')
-                    .setTitle(`${englishTitle}`)
-                    .setURL(`https://anilist.co/anime/${response.docs[0].anilist_id}`)
-                    .setDescription(`I'm literally just a link to anilist`);
-
-                console.log(response);
-                message.reply(`Anime is: ${englishTitle} (${similarity}% confidence)`);
-                message.channel.send(exampleEmbed);
-            } catch (error) {
-                message.reply("Couldn't retrieve anime information :(");
-                console.log(error);
+        // Anilist query
+        var query = `
+        query ($id: Int, $page: Int, $perPage: Int, $search: String) {
+            Page (page: $page, perPage: $perPage) {
+                pageInfo {
+                    total
+                    currentPage
+                    lastPage
+                    hasNextPage
+                    perPage
+                }
+                media (id: $id, search: $search, type: ANIME) {
+                    id
+                    title {
+                        romaji
+                    }
+                    coverImage {
+                        extraLarge
+                        color
+                    }
+                    bannerImage
+                    description(asHtml: false)
+                    episodes
+                    status
+                    genres
+                    season
+                    seasonYear
+                    studios(isMain: true) {
+                        nodes {
+                            name
+                        }
+                    }
+                }
             }
-        };
+        }
+        `;
 
-        getData(traceUrl);
+        let traceMoeUrl = `https://trace.moe/api/search?url=${attachedImageUrl}`,
+            traceMoeOptions = {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+            }
+
+        fetch(traceMoeUrl, traceMoeOptions)
+            .then(response => response.json())
+            .then(json => {
+                let animeTitle = json.docs[0].title_english;
+                message.reply(`Anime is: ${animeTitle} (${json.docs[0].similarity * 100}% confidence)`);
+
+                // Anilist query variables
+                let variables = {
+                    search: animeTitle,
+                    page: 1,
+                    perPage: 3
+                };
+                
+                // Anilist query url
+                let url = 'https://graphql.anilist.co',
+                    options = {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            query: query,
+                            variables: variables
+                        })
+                    };
+                return fetch(url, options);
+            }).then(response => response.json()
+                .then(json => response.ok ? json : Promise.reject(json)))
+            .then(json => {
+                console.log(JSON.stringify(json, null, 3));
+                const series = json.data.Page.media[0];
+                utils.sendAnimeSeriesEmbed(series, message);    
+            }).catch(error => {
+                console.error(error);
+                message.reply("Failed to get anime :(");
+            })
     },
 };

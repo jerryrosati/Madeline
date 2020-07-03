@@ -59,8 +59,14 @@ module.exports = {
                 {name: 'Status', value: this.capitalizeFirstLetter(series.status), inline: true},
                 {name: 'Season', value: `${this.capitalizeFirstLetter(series.season)} ${series.seasonYear}`, inline: true},
                 {name: 'Genres', value: series.genres, inline: true},
-                {name: 'Studio', value: series.studios.nodes.map(studio => studio.name), inline: true}
             );
+
+        let studios = series.studios.nodes;
+        if (studios.length > 0) {
+            embed.addFields(
+                {name: 'Studio', value: series.studios.nodes.map(studio => studio.name), inline: true},
+            );
+        }
         message.channel.send(embed);
     }
 }
