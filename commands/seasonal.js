@@ -3,6 +3,7 @@
  */
 const Discord = require('discord.js');
 const utils = require('./../utils.js');
+const fetch = require("node-fetch");
 
 module.exports = {
     name: 'season',

@@ -5,6 +5,7 @@
  * Example: !anime kaguya
  */
 const utils = require('./../utils.js');
+const fetch = require("node-fetch");
 
 module.exports = {
     name: 'anime',
