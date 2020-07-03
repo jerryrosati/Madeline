@@ -76,16 +76,16 @@ module.exports = {
                 let desc = staff.description;
                 let characters = staff.characters.edges;
 
-                // Limit the description to 2048 characters if there's a description.
-                if (desc && desc.length > 2048) {
-                    desc = desc.slice(0, 2045) + "...";
-                }
-                            
                 const embed = new Discord.MessageEmbed()
                     .setTitle(`${staff.name.full} ( ${staff.name.native} )`)
                     .setURL(staff.siteUrl)
-                    .setDescription(desc.replace(/(<([^>]+)>)/g, ""))
                     .setThumbnail(staff.image.large);
+
+                // Limit the description to 2048 characters if there's a description.
+                if (desc && desc.length > 2048) {
+                    desc = desc.slice(0, 2045) + "...";
+                    embed.setDescription(desc.replace(/(<([^>]+)>)/g, ""));
+                }
 
                 // If the staff has played any character roles, add those to the embed.
                 if (characters.length) {
