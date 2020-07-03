@@ -73,13 +73,13 @@ module.exports = {
             .then(data => {
                 console.log(JSON.stringify(data, null, 3));
                 const staff = data.data.Staff;
-
                 let desc = staff.description;
-                if (desc.length > 2048) {
+                let characters = staff.characters.edges;
+
+                // Limit the description to 2048 characters if there's a description.
+                if (desc && desc.length > 2048) {
                     desc = desc.slice(0, 2045) + "...";
                 }
-
-                let characters = staff.characters.edges;
                             
                 const embed = new Discord.MessageEmbed()
                     .setTitle(`${staff.name.full} ( ${staff.name.native} )`)
@@ -87,6 +87,7 @@ module.exports = {
                     .setDescription(desc.replace(/(<([^>]+)>)/g, ""))
                     .setThumbnail(staff.image.large);
 
+                // If the staff has played any character roles, add those to the embed.
                 if (characters.length) {
                     let roles = characters.slice(0, 5) 
                         .flatMap(edge => `[${edge.node.name.full}](${edge.node.siteUrl}) | [${edge.node.media.nodes[0].title.romaji}](${edge.node.media.nodes[0].siteUrl})`)
