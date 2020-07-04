@@ -1,9 +1,14 @@
 /**
- * Seasonal command
+ * Gets the anime that's airing during a specific season.
+ * 
+ * Usage: !season [SEASON YEAR] (case insensitive).
+ * Examples:
+ *    !season (gets anime from current season)
+ *    !season winter 2020 (gets anime from the winter 2020 season)
  */
+
 const Discord = require('discord.js');
 const utils = require('./../utils.js');
-const fetch = require("node-fetch");
 
 module.exports = {
     name: 'season',
@@ -14,7 +19,6 @@ module.exports = {
 
     execute(message, args) {
         // Anilist query
-        // format: TV is for a current season. specfic searches will use format_in: [TV, MOVIE]
         var query = `
         query ($season: MediaSeason, $seasonYear: Int) {
             Page {
@@ -36,23 +40,39 @@ module.exports = {
             }
         }`;
 
-        // TODO: 6/11/2020 Update default value to current season.
-        let season = (args[0] && /fall|spring|winter|summer/.test(args[0].toLowerCase())) ? args[0].toUpperCase() : "SPRING";
-        let year = args[1] ? args[1] : 2020;
+        let season;
+        let year;
 
-        var variables = {
+        // If the user doesn't provide arguments, use the current season.
+        if (!args.length) {
+            const currentSeason = getCurrentSeason();
+            season = currentSeason.season;
+            year = currentSeason.year;    
+        } else if (args.length === 2) {
+            if (/fall|spring|winter|summer/.test(args[0].toLowerCase())) {
+                season = args[0].toUpperCase();
+            } else { 
+                message.reply("Invalid season. Season needs to be spring, summer, fall, or winter.");
+            }
+
+            // TODO: 7/4/2020 Add check for whether year is after current year and inform the user it may not be accurate?
+            year = args[1];
+        } else {
+            message.reply("Invalid arguments. Usage is: !season (for current season), or !season SEASON YEAR");
+        }
+
+        let variables = {
             season: season,
             seasonYear: year,
         };
 
         utils.queryAnilist(query, variables)
-            .then(data => {
-                console.log(JSON.stringify(data, null, 3));
-                const seasonalAnime = data.data.Page.media.slice(0, 11);
+            .then(json => {
+                console.log(JSON.stringify(json, null, 3));
+                const seasonalAnime = json.data.Page.media.slice(0, 11);
                 const seasonalArray = seasonalAnime.flatMap(anime => `[__${anime.title.romaji}__](${anime.siteUrl})\n**Episodes**: ${anime.episodes} | **Start Date**: ${anime.startDate.month}/${anime.startDate.day}/${anime.startDate.year}\n`);
                 const seasonName = utils.capitalizeFirstLetter(variables.season)
 
-                // TODO: 6/11/2020 Update title style.
                 const embed = new Discord.MessageEmbed()
                     .setTitle(`${seasonName} ${variables.seasonYear}`)
                     .setURL(`https://anichart.net/${seasonName}-${variables.seasonYear}`)
@@ -60,6 +80,35 @@ module.exports = {
                     .setDescription(seasonalArray.join("\n"));
 
                 message.channel.send(embed);
-            }).catch(error => console.error(error));
+            }).catch(error => {
+                message.reply("Couldn't retrieve anime for that season");
+                console.error(error)
+            });
     },
 };
+
+/**
+ * Gets the current season and year.
+ * 
+ * @return {Object} An object containing the season string and the year.
+ */
+function getCurrentSeason() {
+    const date = new Date();
+    const month = date.getMonth() + 1;
+    let season;
+
+    if ([1, 2, 3].includes(month)) {
+        season = 'WINTER';
+    } else if ([4, 5, 6].includes(month)) {
+        season = 'SPRING';
+    } else if ([7, 8, 9].includes(month)) {
+        season = 'SUMMER';
+    } else {
+        season = 'FALL';
+    }
+
+    return {
+        season: season,
+        year: date.getFullYear()
+    };
+}

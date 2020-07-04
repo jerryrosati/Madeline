@@ -1,3 +1,12 @@
+/**
+ * Gets a random anime suggestion based off of an anime title or genre.
+ * 
+ * Usage: !random anime ANIME|genre GENRE...
+ * Examples: 
+ *     !random kaguya
+ *     !random shounen pirates
+ */
+
 const utils = require('./../utils.js');
 const fetch = require("node-fetch");
 
@@ -15,7 +24,7 @@ module.exports = {
         const url = 'https://graphql.anilist.co';
 
         if (!args.length) {
-
+            message.reply(`Please provide an argument. Usage: !random ${usage}`);
         } else if (args[0] === 'genre') {
             // Exit if the user hasn't provided a genre.
             if (args.length < 2) {
@@ -24,8 +33,11 @@ module.exports = {
                     "Please provide at least one genre");
                 return;
             }
+
+            // TODO: 7/4/2020 Implement random anime based on genres.
             const genreList = args.slice(1).join(",");
             console.log(genreList);
+            message.reply("Malt hasn't implemented this yet.");
             return;
         } else if (args[0] === 'anime') {
             // Exit if the user hasn't provided an anime title.

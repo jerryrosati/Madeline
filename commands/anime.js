@@ -1,11 +1,11 @@
 /**
- * Anime command. Used to search anilist for an anime.
+ * Used to search anilist for an anime.
  * 
  * Usage: !anime anime_title (can be partial)
  * Example: !anime kaguya
  */
+
 const utils = require('./../utils.js');
-const fetch = require("node-fetch");
 const {ANIME_QUERY} = require('./../constants.js');
 
 module.exports = {

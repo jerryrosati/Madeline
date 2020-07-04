@@ -1,6 +1,7 @@
 /**
  * Madeline the discord bot
  */
+
 const fs = require('fs');
 const utils = require('./utils.js');
 const { prefix, token } = require('./config.json');

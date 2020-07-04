@@ -1,3 +1,9 @@
+/**
+ * Searches Anilist for a manga title.
+ * 
+ * Usage: !manga TITLE
+ */
+
 const Discord = require('discord.js');
 const utils = require('./../utils.js');
 const fetch = require("node-fetch");

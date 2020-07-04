@@ -1,8 +1,11 @@
 /**
- * Staff command
+ * Searches Anilist for a staff member.
+ * 
+ * Usage: !staff NAME
+ * Example: !staff Rie Takahashi
  */
+
 const Discord = require('discord.js');
-const fetch = require('node-fetch');
 const utils = require('./../utils.js');
 
 module.exports = {
