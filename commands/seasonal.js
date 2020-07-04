@@ -16,7 +16,7 @@ module.exports = {
         // Anilist query
         // format: TV is for a current season. specfic searches will use format_in: [TV, MOVIE]
         var query = `
-        query ($season: MediaSeason, $seasonYear: Int) { 
+        query ($season: MediaSeason, $seasonYear: Int) {
             Page {
                 pageInfo {
                     total
@@ -26,27 +26,15 @@ module.exports = {
                     hasNextPage
                 }
                 media(season: $season, seasonYear: $seasonYear, format: TV, sort: POPULARITY_DESC) {
-                    title {
-                        romaji
-                        english
-                    }
-                    startDate {
-                        year
-                        month
-                        day
-                    }
-                    endDate {
-                        year
-                        month
-                        day
-                    }
                     episodes
                     siteUrl
                     bannerImage
+                    title { romaji english }
+                    startDate { year month day }
+                    endDate { year month day }
                 }
             }
-        }
-        `;
+        }`;
 
         // TODO: 6/11/2020 Update default value to current season.
         let season = (args[0] && /fall|spring|winter|summer/.test(args[0].toLowerCase())) ? args[0].toUpperCase() : "SPRING";
@@ -56,23 +44,8 @@ module.exports = {
             season: season,
             seasonYear: year,
         };
-        
-        // Anilist query url
-        var url = 'https://graphql.anilist.co',
-            options = {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                },
-                body: JSON.stringify({
-                    query: query,
-                    variables: variables
-                })
-            };
 
-        fetch(url, options)
-            .then(response => response.json().then(json => response.ok ? json : Promise.reject(json)))
+        utils.queryAnilist(query, variables)
             .then(data => {
                 console.log(JSON.stringify(data, null, 3));
                 const seasonalAnime = data.data.Page.media.slice(0, 11);

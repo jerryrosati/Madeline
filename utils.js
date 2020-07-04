@@ -1,5 +1,7 @@
 const config = require('./config.json');
 const Discord = require('discord.js');
+const fetch = require('node-fetch');
+const {ANILIST_QUERY_URL} = require('./constants.js');
 
 module.exports = {
     /**
@@ -38,6 +40,27 @@ module.exports = {
         }
 
         return message.channel.send(reply);
+    },
+
+
+    /**
+     * Perform an Anilist query.
+     * @param {String} query 
+     * @param {*} variables 
+     */
+    queryAnilist(query, variables) {
+        let options = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({ query, variables })
+        };
+
+        return fetch(ANILIST_QUERY_URL, options)
+            .then(response => response.json()
+                .then(json => response.ok ? json : Promise.reject(json)));
     },
 
     /**

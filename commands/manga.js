@@ -9,8 +9,8 @@ module.exports = {
 
     execute(message, args) {
         // Anilist query
-        var query = `
-        query ($id: Int, $page: Int, $perPage: Int, $search: String) {
+        var query = 
+        `query ($id: Int, $page: Int, $perPage: Int, $search: String) {
             Page (page: $page, perPage: $perPage) {
                 pageInfo {
                     total
@@ -21,13 +21,6 @@ module.exports = {
                 }
                 media (id: $id, search: $search, type: MANGA) {
                     id
-                    title {
-                        romaji
-                    }
-                    coverImage {
-                        extraLarge
-                        color
-                    }
                     bannerImage
                     description(asHtml: false)
                     chapters
@@ -35,21 +28,20 @@ module.exports = {
                     status
                     siteUrl
                     genres
+                    title { romaji }
+                    coverImage { extraLarge color }
                     staff {
                         edges {
                             role
                             node {
-                                name {
-                                    full
-                                }
+                                name { full }
                                 siteUrl
                             }
                         }
                     }
                 }
             }
-        }
-        `;
+        }`;
 
         // Anilist query variables
         var variables = {

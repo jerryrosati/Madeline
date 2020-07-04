@@ -2,7 +2,8 @@
  * Staff command
  */
 const Discord = require('discord.js');
-const fetch = require("node-fetch");
+const fetch = require('node-fetch');
+const utils = require('./../utils.js');
 
 module.exports = {
     name: 'staff',
@@ -16,60 +17,35 @@ module.exports = {
         var query = `
         query ($name: String) {
             Staff(search:$name) {
-                name {
-                    full
-                    native
-                }
                 siteUrl
                 description
-                image {
-                    large
-                }
+                image { large }
+                name { full native }
                 characters(sort: FAVOURITES_DESC) {
                     edges {
                         id
                         node {
                             id
-                            name {
-                                full
-                            }
+                            siteUrl
+                            name { full }
                             media(sort: POPULARITY_DESC) {
                                 nodes {
-                                    title {
-                                        romaji
-                                    }
+                                    title { romaji }
                                     siteUrl
                                 }
                             }
-                            siteUrl
                         }
                     }
                 }
             }
-        }
-        `;
+        }`;
 
         // Anilist query variables
         var variables = {
             name: args.join(" "),
         };
         
-        // Anilist query url
-        var url = 'https://graphql.anilist.co',
-            options = {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                },
-                body: JSON.stringify({
-                    query: query,
-                    variables: variables
-                })
-            };
-        
-        fetch(url, options)
-            .then(response => response.json().then(json => response.ok ? json : Promise.reject(json)))
+        utils.queryAnilist(query, variables)
             .then(data => {
                 console.log(JSON.stringify(data, null, 3));
                 const staff = data.data.Staff;
