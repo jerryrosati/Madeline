@@ -27,19 +27,29 @@ client.once('ready', () => {
 });
 
 // Execute commands
-client.on('message', message => {
+client.on('message', async message => {
     if (!message.content.startsWith(prefix) || message.author.bot) return;
 
-    const args = message.content.slice(prefix.length).split(/ +/)
+    // Split input into command and args.
+    // Args are split based on spaces or quotes. E.g. the input, "this is a poll" option1 option2
+    // will yield an args list of ["this is a poll", option1, option2]
+    const args = message.content.slice(prefix.length).match(/[^\s"]+|"([^"]*)"/g);
     const commandName = args.shift().toLowerCase();
 
+    console.log(`Command: ${commandName}`);
+    console.log("Args:");
+    for (let i = 0; i < args.length; i++) {
+        console.log(`\t${args[i]}`);
+    }
+
+    // Make sure the command exists.
     if (!client.commands.has(commandName)) {
         message.reply('Unknown command');
         return;
     };
 
+    // Make sure the command has the correct arguments.
     const command = client.commands.get(commandName);
-
     if (command.args && !command.argsOptional && !args.length) {
         utils.reportCommandUsageError(command,
             message, 
@@ -47,6 +57,7 @@ client.on('message', message => {
         return;
     }
 
+    // Execute the command.
     try {
         command.execute(message, args);
     } catch (error) {
