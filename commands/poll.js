@@ -32,7 +32,7 @@ const utils = require("../utils");
 
         let desc = '';
         for (let i = 1; i < args.length; i++) {
-            desc += `\t${emojis[i - 1]}: ${args[i]}\n\n`
+            desc += `${emojis[i - 1]}: ${args[i]}\n\n`
         }
 
         const embed = new Discord.MessageEmbed()
