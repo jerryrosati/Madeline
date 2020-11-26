@@ -1,4 +1,6 @@
 # Madeline
+![Node.js CI](https://github.com/GeraldRosati/Madeline/workflows/Node.js%20CI/badge.svg?branch=master)
+
 Madeline is a multi-purpose discord bot built using [discord.js](https://discord.js.org/#/), whose name comes from the game [Celeste](http://www.celestegame.com/). 
 
 Madeline's anime- and manga-related commands use [Anilist](https://anilist.co/) and [Trace.moe](https://trace.moe/).
