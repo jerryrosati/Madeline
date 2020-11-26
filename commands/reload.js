@@ -1,7 +1,7 @@
 module.exports = {
     name: 'reload',
     description: 'Reload command files',
-    usage: "[command]", 
+    usage: '[command]',
     args: true,
     argsOptional: true,
 

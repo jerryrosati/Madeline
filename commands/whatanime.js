@@ -1,11 +1,11 @@
 /**
  * whatanime command. Used to search search Trace.moe for an anime using a picture.
- * 
+ *
  * Usage: !whatanime (with image attached to discord message)
  */
 
-const utils = require('./../utils.js');
-const fetch = require("node-fetch");
+const utils = require('./../utils.js')
+const fetch = require('node-fetch')
 
 module.exports = {
     name: 'whatanime',
@@ -15,21 +15,21 @@ module.exports = {
     execute(message, args) {
         // Exit if message doesn't have any attachments.
         if (!message.attachments.array().length) {
-            message.reply(`Couldn't search :( Need an image attachment.`)
-            return;
+            message.reply('Couldn\'t search :( Need an image attachment.')
+            return
         }
 
-        const attachedImageUrl = message.attachments.first().url;
-        console.log(attachedImageUrl);
+        const attachedImageUrl = message.attachments.first().url
+        console.log(attachedImageUrl)
 
         // Exit if attachment is a gif.
-        if (attachedImageUrl.endsWith(".gif")) {
-            message.reply("Right now I only handle still images :(");
-            return;
+        if (attachedImageUrl.endsWith('.gif')) {
+            message.reply('Right now I only handle still images :(')
+            return
         }
 
         // Anilist query
-        var query = `
+        const query = `
         query ($id: Int, $page: Int, $perPage: Int, $search: String) {
             Page (page: $page, perPage: $perPage) {
                 pageInfo {
@@ -63,53 +63,53 @@ module.exports = {
                 }
             }
         }
-        `;
+        `
 
-        let traceMoeUrl = `https://trace.moe/api/search?url=${attachedImageUrl}`,
-            traceMoeOptions = {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                },
+        const traceMoeUrl = `https://trace.moe/api/search?url=${attachedImageUrl}`
+        const traceMoeOptions = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json'
             }
+        }
 
         fetch(traceMoeUrl, traceMoeOptions)
             .then(response => response.json())
             .then(json => {
-                let animeTitle = json.docs[0].title_english;
-                message.reply(`Anime is: ${animeTitle} (${json.docs[0].similarity * 100}% confidence)`);
+                const animeTitle = json.docs[0].title_english
+                message.reply(`Anime is: ${animeTitle} (${json.docs[0].similarity * 100}% confidence)`)
 
                 // Anilist query variables
-                let variables = {
+                const variables = {
                     search: animeTitle,
                     page: 1,
                     perPage: 3
-                };
-                
+                }
+
                 // Anilist query url
-                let url = 'https://graphql.anilist.co',
-                    options = {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            query: query,
-                            variables: variables
-                        })
-                    };
-                return fetch(url, options);
+                const url = 'https://graphql.anilist.co'
+                const options = {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Accept: 'application/json'
+                    },
+                    body: JSON.stringify({
+                        query: query,
+                        variables: variables
+                    })
+                }
+                return fetch(url, options)
             }).then(response => response.json()
                 .then(json => response.ok ? json : Promise.reject(json)))
             .then(json => {
-                console.log(JSON.stringify(json, null, 3));
-                const series = json.data.Page.media[0];
-                utils.sendAnimeSeriesEmbed(series, message);    
+                console.log(JSON.stringify(json, null, 3))
+                const series = json.data.Page.media[0]
+                utils.sendAnimeSeriesEmbed(series, message)
             }).catch(error => {
-                console.error(error);
-                message.reply("Failed to get anime :(");
+                console.error(error)
+                message.reply('Failed to get anime :(')
             })
-    },
-};
+    }
+}

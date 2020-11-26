@@ -1,8 +1,9 @@
 module.exports = {
-	name: 'ping',
-	description: 'Ping!',
+    name: 'ping',
+    description: 'Ping!',
 
-	execute(message, args) {
-        message.channel.send('Pong ^\_\_^');
-	},
-};
+    execute(message, args) {
+        // eslint-disable-next-line no-useless-escape
+        message.channel.send('Pong ^\_\_^')
+    }
+}
