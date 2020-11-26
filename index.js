@@ -9,7 +9,7 @@ const Discord = require('discord.js');
 
 
 // Create a new discord client
-const client = new Discord.Client();
+const client = new Discord.Client({ partials: ['USER', 'GUILD_MEMBER'] });
 client.commands = new Discord.Collection();
 
 // Saves an array of all files in the commands folder that end in '.js'.
