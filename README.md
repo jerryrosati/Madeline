@@ -5,7 +5,7 @@ Madeline's anime- and manga-related commands use [Anilist](https://anilist.co/) 
 
 ## Commands
 ### Anime/Manga
-- `!anime`: Search for an anime.
+- `!anime`: Search for an anime title.
 - `!manga`: Search for a manga title.
 - `!staff`: Search for a staff-member (artist, VA, author, musician, etc)
 - `!season`: Search for a specific season.
@@ -14,6 +14,7 @@ Madeline's anime- and manga-related commands use [Anilist](https://anilist.co/) 
 
 ### Utility
 - `!schedule`: Schedule an event; Madeline will send a message at the specified time and date.
+- `!poll`: Creates a poll and lets users vote by reacting.
 
 ### Developer Commands
 - `!pull`: Perform a `git pull` on the repository.
