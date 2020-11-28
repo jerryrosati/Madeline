@@ -1,4 +1,6 @@
 const fs = require('fs')
+const { Observable } = require('rxjs')
+const { take } = require('rxjs/operators')
 
 module.exports = {
     name: 'bee',
@@ -6,16 +8,9 @@ module.exports = {
     args: false,
 
     execute(message, args) {
-        // Send the bee movie script one word at a time.
-        const readScript = async textList => {
-            for (const token of textList) {
-                console.log(token)
-                message.channel.send(token)
-
-                // Pause for 2 seconds between each message.
-                await new Promise(resolve => setTimeout(resolve, 2000))
-            }
-        }
+        let observable
+        let i = 0
+        let textList
 
         // Read in the script.
         fs.readFile('./resources/entire_bee_movie_script.txt', 'utf8', (err, data) => {
@@ -24,8 +19,19 @@ module.exports = {
                 return
             }
 
-            const textList = data.split(/ +/)
-            readScript(textList)
+            textList = data.split(/ +/)
+            observable = new Observable(function subscribe(subscriber) {
+                const intervalId = setInterval(() => {
+                    subscriber.next(textList[i++])
+                }, 2000)
+
+                return function unsubscribe() {
+                    clearInterval(intervalId)
+                }
+            })
+
+            // Send the script one word at a time.
+            observable.pipe(take(textList.length)).subscribe(word => message.channel.send(word))
         })
     }
 }
