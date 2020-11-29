@@ -6,7 +6,6 @@
  *     !random kaguya
  *     !random shounen pirates
  */
-
 const utils = require('./../utils.js')
 const fetch = require('node-fetch')
 

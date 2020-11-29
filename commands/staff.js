@@ -4,7 +4,6 @@
  * Usage: !staff NAME
  * Example: !staff Rie Takahashi
  */
-
 const Discord = require('discord.js')
 const utils = require('./../utils.js')
 

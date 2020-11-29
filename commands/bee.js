@@ -1,5 +1,7 @@
 /**
  * Prints out the bee movie script one word at a time.
+ *
+ * Usage: !bee [identifier]
  */
 const fs = require('fs')
 const utils = require('../utils')
@@ -21,9 +23,10 @@ module.exports = {
 
         if (args.length > 0) {
             identifier = args[0]
-        }
 
-        message.reply(`Your safe word is ${identifier}`)
+            // Tell the user what their identifier is.
+            message.reply(`Your safe word is ${identifier}`)
+        }
 
         // Read in the script.
         fs.readFile(config.bee_movie_script_path, 'utf8', (err, data) => {
@@ -48,18 +51,21 @@ module.exports = {
 
             // Send the script one word at a time.
             // Zip to keep time interval consistent.
-            subscription = observable.pipe(source => zip(source, interval(2000)), map(([word, number]) => word), take(textList.length))
-                .subscribe(word => {
-                    message.channel.send(word)
-                })
+            subscription = observable
+                .pipe(source => zip(source, interval(2000)),
+                    map(([word, number]) => word),
+                    take(textList.length))
+                .subscribe(word => message.channel.send(word), error => console.log(error))
         })
 
+        // Listen for identifiers that signal the instance of !bee to stop.
+        // The command will stop if the identifier is correct, or the identifier is "all".
         utils.getBeeIdentifierSubject()
             .pipe(filter(id => {
-                console.log(`id in subject = ${id}`)
-                console.log(`identifier in subject = ${identifier}`)
+                console.log(`!safe identifier received = ${id}`)
+                console.log(`!bee instance identifier = ${identifier}`)
                 return id === identifier || id === 'all'
             }))
-            .subscribe(word => subscription.unsubscribe())
+            .subscribe(word => subscription.unsubscribe(), error => console.log(error))
     }
 }

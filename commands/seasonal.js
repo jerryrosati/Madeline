@@ -6,7 +6,6 @@
  *    !season (gets anime from current season)
  *    !season winter 2020 (gets anime from the winter 2020 season)
  */
-
 const Discord = require('discord.js')
 const utils = require('./../utils.js')
 

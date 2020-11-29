@@ -1,11 +1,14 @@
 /**
- * Command to stop the output of the !bee command. Currently stops all ongoing !bee commands.
+ * Command to stop the output of the !bee command.
+ *
+ * Usage: !safe [identifier]
  */
 const utils = require('../utils.js')
 
 module.exports = {
     name: 'safe',
     description: 'Stops the !bee command.',
+    usage: '[identifier]',
     args: true,
     argsOptional: true,
 
@@ -17,6 +20,7 @@ module.exports = {
             identifier = args[0]
         }
 
+        // Send the identifier to all observers.
         utils.emitBeeIdentifier(identifier)
     }
 }
