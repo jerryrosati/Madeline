@@ -4,7 +4,6 @@
  * Usage: !poll "Poll text" option1 option2 [option3 ... option10]
  * Example: !poll "What day should we play?" Monday Tuesday Wednesday
  */
-
 const Discord = require('discord.js')
 const utils = require('../utils')
 

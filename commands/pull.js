@@ -3,6 +3,7 @@
  *
  * Performs a git pull.
  */
+const config = require('../config.json')
 const { exec } = require('child_process')
 
 module.exports = {
@@ -11,7 +12,7 @@ module.exports = {
     args: false,
 
     execute(message, args) {
-        if (message.author.id !== '216242546379194369' && message.author.id !== '216346278752288768') {
+        if (message.author.id !== config.dev_id) {
             message.reply('Not permitted to run git pull :(')
             return
         }
