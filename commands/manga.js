@@ -11,6 +11,7 @@ const fetch = require('node-fetch')
 module.exports = {
     name: 'manga',
     description: 'Search for manga',
+    usage: 'manga_series_title',
     args: true,
 
     execute(message, args) {

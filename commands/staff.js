@@ -12,7 +12,7 @@ module.exports = {
     description: 'Search for staff',
     args: true,
     argsOptional: false,
-    usage: '<staff to search for>',
+    usage: 'staff_to_search_for',
 
     execute(message, args) {
         // Anilist query

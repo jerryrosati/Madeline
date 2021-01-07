@@ -9,6 +9,7 @@ const fetch = require('node-fetch')
 module.exports = {
     name: 'whatanime',
     description: 'Check what anime with a gif or image.',
+    usage: '(gif needs to be attached)',
     args: false,
 
     execute(message, args) {

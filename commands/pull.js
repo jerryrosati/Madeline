@@ -9,6 +9,7 @@ const { exec } = require('child_process')
 module.exports = {
     name: 'pull',
     description: 'Pulls the newest code from the git branch',
+    usage: '',
     args: false,
 
     execute(message, args) {

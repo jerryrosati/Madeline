@@ -7,7 +7,7 @@ const utils = require('../utils.js')
 
 module.exports = {
     name: 'safe',
-    description: 'Stops the !bee command.',
+    description: 'Stops the !bee command',
     usage: '[identifier]',
     args: true,
     argsOptional: true,
