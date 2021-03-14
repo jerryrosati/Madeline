@@ -82,7 +82,7 @@ module.exports = {
                 // Round to 2 decimal places.
                 const confidence = (json.docs[0].similarity * 100).toFixed(2)
 
-                message.reply(`Anime is: ${animeTitle} (${confidence}% confidence)`)
+                message.reply(`Anime is: **${animeTitle}** (${confidence}% confidence)`)
 
                 // Anilist query variables
                 const variables = {
