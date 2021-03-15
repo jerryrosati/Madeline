@@ -7,7 +7,7 @@
  *    !season winter 2020 (gets anime from the winter 2020 season)
  */
 const Discord = require('discord.js')
-const utils = require('./../utils.js')
+const utils = require('../utils.js')
 
 module.exports = {
     name: 'season',
@@ -54,10 +54,10 @@ module.exports = {
                 message.reply('Invalid season. Season needs to be spring, summer, fall, or winter.')
             }
 
-            // TODO: 7/4/2020 Add check for whether year is after current year and inform the user it may not be accurate?
             year = args[1]
         } else {
-            message.reply('Invalid arguments. Usage is: !season (for current season), or !season SEASON YEAR')
+            message.reply('Invalid arguments. Usage is: `!season` (for current season), or `!season SEASON (e.g. spring) YEAR (e.g. 2021)` for a specific season.')
+            return
         }
 
         const variables = {
@@ -69,17 +69,16 @@ module.exports = {
             .then(json => {
                 console.log(JSON.stringify(json, null, 3))
                 const seasonalAnime = json.data.Page.media.slice(0, 11)
-                const seasonalArray = seasonalAnime.flatMap(anime => `[__${anime.title.romaji}__](${anime.siteUrl})\n**Episodes**: ${anime.episodes} | **Start Date**: ${anime.startDate.month}/${anime.startDate.day}/${anime.startDate.year}\n`)
+                const seasonalArray = seasonalAnime.flatMap(anime => generateSeriesString(anime))
                 const seasonName = utils.capitalizeFirstLetter(variables.season)
-
                 const embed = new Discord.MessageEmbed()
                     .setTitle(`${seasonName} ${variables.seasonYear}`)
                     .setURL(`https://anichart.net/${seasonName}-${variables.seasonYear}`)
-                    .setImage(seasonalAnime[Math.floor(Math.random() * seasonalAnime.length)].bannerImage)
                     .setDescription(seasonalArray.join('\n'))
 
                 message.channel.send(embed)
-            }).catch(error => {
+            })
+            .catch(error => {
                 message.reply("Couldn't retrieve anime for that season")
                 console.error(error)
             })
@@ -110,4 +109,58 @@ function getCurrentSeason() {
         season: season,
         year: date.getFullYear()
     }
+}
+
+/**
+ * Generates a string to add to the discord embed for an anime series.
+ *
+ * @param {*} anime The anime information extracted from the JSON.
+ * @return {String} The line as a string.
+ */
+function generateSeriesString(anime) {
+    let baseString = `[__${anime.title.romaji}__](${anime.siteUrl})\n`
+
+    // Add episode count if it exists.
+    baseString += `**Episodes**: ${anime.episodes == null ? 'Unavailable' : anime.episodes}`
+
+    // Add the date.
+    baseString += generateDateString(anime)
+    return baseString + '\n'
+}
+
+/**
+ * Generates a date string from the anime start date.
+ *
+ * @param {*} anime The anime information extracted from the JSON.
+ * @return {String} The line as a string.
+ */
+function generateDateString(anime) {
+    let dateString = ''
+
+    const month = anime.startDate.month
+    const day = anime.startDate.day
+    const year = anime.startDate.year
+
+    // We only use the Date object to get the month, so don't add the day to the date.
+    const startDate = new Date(year, month - 1)
+
+    if ([month, day, year].some(part => part != null)) {
+        dateString += '\n**Start Date:** '
+
+        if (month != null) {
+            const options = { month: 'long' }
+            const longMonth = Intl.DateTimeFormat('en-US', options).format(startDate)
+            dateString += `${longMonth} `
+        }
+
+        if (day != null) {
+            dateString += `${day} `
+        }
+
+        if (year != null) {
+            dateString += `${year}`
+        }
+    }
+
+    return dateString
 }
