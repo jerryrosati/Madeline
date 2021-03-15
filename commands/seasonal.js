@@ -19,8 +19,8 @@ module.exports = {
     execute(message, args) {
         // Anilist query
         const query = `
-        query ($season: MediaSeason, $seasonYear: Int) {
-            Page {
+        query ($season: MediaSeason, $seasonYear: Int, $page: Int, $perPage: Int) {
+            Page (page: $page, perPage: $perPage) {
                 pageInfo {
                     total
                     perPage
@@ -39,8 +39,12 @@ module.exports = {
             }
         }`
 
+        // Left and right arrow unicode.
+        const reactEmoji = ['⏮', '⏭']
+
         let season
         let year
+        let page = 1
 
         // If the user doesn't provide arguments, use the current season.
         if (!args.length) {
@@ -62,21 +66,112 @@ module.exports = {
 
         const variables = {
             season: season,
-            seasonYear: year
+            seasonYear: year,
+            page: page,
+            perPage: 10
         }
 
+        // Query for the first page and send the initial embed, then wait for reactions.
         utils.queryAnilist(query, variables)
             .then(json => {
                 console.log(JSON.stringify(json, null, 3))
                 const seasonalAnime = json.data.Page.media.slice(0, 11)
                 const seasonalArray = seasonalAnime.flatMap(anime => generateSeriesString(anime))
                 const seasonName = utils.capitalizeFirstLetter(variables.season)
+
+                let currentPage = json.data.Page.pageInfo.currentPage
+                let lastPage = json.data.Page.pageInfo.lastPage
+                let hasNextPage = json.data.Page.pageInfo.hasNextPage
+
                 const embed = new Discord.MessageEmbed()
                     .setTitle(`${seasonName} ${variables.seasonYear}`)
                     .setURL(`https://anichart.net/${seasonName}-${variables.seasonYear}`)
-                    .setDescription(seasonalArray.join('\n'))
+                    .setDescription(seasonalArray.join('\n') + `\nPage: ${currentPage}/${lastPage}`)
 
                 message.channel.send(embed)
+                    .then(embedMessage => {
+                        // Add the initial reactions.
+                        reactEmoji.forEach(emoji => embedMessage.react(emoji))
+
+                        // Wait for reactions.
+                        const collector = embedMessage.createReactionCollector((reaction, user) => {
+                            return reactEmoji.includes(reaction.emoji.name) && (user.id === message.author.id)
+                        })
+
+                        collector.on('collect', async (reaction, user) => {
+                            if (user.partial) {
+                                console.log('User who reacted is partial')
+                                try {
+                                    await user.fetch()
+                                } catch (error) {
+                                    console.error('Something went wrong when fetching the user')
+                                }
+                            }
+
+                            console.log(`Collected ${reaction.emoji.name} from ${user.tag}`)
+
+                            // Go backwards if the back arrow was pressed and we can go backwards.
+                            if (reaction.emoji.name === reactEmoji[0] && currentPage > 1) {
+                                page -= 1
+                                variables.page = page
+                                utils.queryAnilist(query, variables)
+                                    .then(json => {
+                                        console.log(JSON.stringify(json, null, 3))
+                                        const seasonalAnime = json.data.Page.media.slice(0, 11)
+                                        const seasonalArray = seasonalAnime.flatMap(anime => generateSeriesString(anime))
+                                        const seasonName = utils.capitalizeFirstLetter(variables.season)                        
+
+                                        currentPage = json.data.Page.pageInfo.currentPage
+                                        lastPage = json.data.Page.pageInfo.lastPage
+                                        hasNextPage = json.data.Page.pageInfo.hasNextPage
+
+                                        const embed = new Discord.MessageEmbed()
+                                            .setTitle(`${seasonName} ${variables.seasonYear}`)
+                                            .setURL(`https://anichart.net/${seasonName}-${variables.seasonYear}`)
+                                            .setDescription(seasonalArray.join('\n') + `\nPage: ${currentPage}/${lastPage}`)
+
+                                        reaction.users.remove(user)
+                                        embedMessage.edit(embed)
+                                    })
+                                    .catch(error => {
+                                        message.reply("Couldn't retrieve anime for that season")
+                                        console.error(error)
+                                    })
+
+                            // Go forward if the forward arrow was pressed and there's a next page.
+                            } else if (reaction.emoji.name === reactEmoji[1] && hasNextPage === true) {
+                                page += 1
+                                variables.page = page
+                                utils.queryAnilist(query, variables)
+                                    .then(json => {
+                                        console.log(JSON.stringify(json, null, 3))
+                                        const seasonalAnime = json.data.Page.media.slice(0, 11)
+                                        const seasonalArray = seasonalAnime.flatMap(anime => generateSeriesString(anime))
+                                        const seasonName = utils.capitalizeFirstLetter(variables.season)
+
+                                        currentPage = json.data.Page.pageInfo.currentPage
+                                        lastPage = json.data.Page.pageInfo.lastPage
+                                        hasNextPage = json.data.Page.pageInfo.hasNextPage
+
+                                        const embed = new Discord.MessageEmbed()
+                                            .setTitle(`${seasonName} ${variables.seasonYear}`)
+                                            .setURL(`https://anichart.net/${seasonName}-${variables.seasonYear}`)
+                                            .setDescription(seasonalArray.join('\n') + `\nPage: ${currentPage}/${lastPage}`)
+
+                                        reaction.users.remove(user)
+                                        embedMessage.edit(embed)
+                                    })
+                                    .catch(error => {
+                                        message.reply("Couldn't retrieve anime for that season")
+                                        console.error(error)
+                                    })
+
+                            // If it can't get another page (because it's at the beginning or end) then just remove the reaction.
+                            } else {
+                                reaction.users.remove(user)
+                            }
+                        })
+                    })
             })
             .catch(error => {
                 message.reply("Couldn't retrieve anime for that season")
