@@ -37,7 +37,7 @@ module.exports = {
         console.log(`type = ${type}, number = ${themeNum}`)
 
         // The query variables.
-        const animeThemesUrl = `https://staging.animethemes.moe/api/search?q=${seriesTitle}&limit=1&fields[search]=anime&fields[anime]=themes`
+        const animeThemesUrl = `https://staging.animethemes.moe/api/search?q=${seriesTitle}&fields[search]=anime&include[anime]=themes.entries.videos&limit=1`
         const queryOptions = {
             method: 'GET',
             headers: {
