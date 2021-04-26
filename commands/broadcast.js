@@ -33,9 +33,17 @@ module.exports = {
             .filter(guild => guild.available)
             .each(guild => {
                 console.log(`Guild name: ${guild.name}`)
-                guild.channels.cache
-                    .filter(channel => channel.name === broadcast_channel_name)
-                    .each(channel => channel.send(embed))
+                console.log(`id = ${message.author.id}`)
+
+                guild.members.fetch(message.author.id)
+                    .then(member => {
+                        embed.setThumbnail(member.user.avatarURL())
+                        embed.setColor(member.displayColor)
+
+                        guild.channels.cache
+                            .filter(channel => channel.name === broadcast_channel_name)
+                            .each(channel => channel.send(embed))
+                    })
             })
     }
 }
