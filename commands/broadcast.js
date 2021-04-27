@@ -26,7 +26,6 @@ module.exports = {
         }
 
         const embed = new Discord.MessageEmbed()
-            .setTitle('Broadcast')
             .setDescription(args.join(' '))
 
         message.client.guilds.cache
@@ -37,7 +36,7 @@ module.exports = {
 
                 guild.members.fetch(message.author.id)
                     .then(member => {
-                        embed.setThumbnail(member.user.avatarURL())
+                        embed.setAuthor('Broadcast', member.user.avatarURL())
                         embed.setColor(member.displayColor)
 
                         guild.channels.cache
