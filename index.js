@@ -4,7 +4,7 @@
 
 const fs = require('fs')
 const utils = require('./utils.js')
-const { prefix, token } = require('./config.json')
+const { prefix, token, defaultBroadcastChannelName } = require('./config.json')
 const Discord = require('discord.js')
 
 // Create a new discord client
@@ -27,6 +27,13 @@ client.once('ready', () => {
 
 // Execute commands
 client.on('message', async message => {
+    if (message.channel.name === defaultBroadcastChannelName && !message.author.bot) {
+        if (client.commands.has('broadcast')) {
+            client.commands.get('broadcast').execute(message, message.content.match(/[^\s"]+|"([^"]*)"/g))
+        }
+        return
+    }
+
     if (!message.content.startsWith(prefix) || message.author.bot) return
 
     // Split input into command and args.
