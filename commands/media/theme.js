@@ -1,7 +1,7 @@
 /**
  * Searches Anithemes.moe for an anime opening or ending song and sends it to the channel.
  *
- * Usage: !theme title [-t OP|ED[number]]
+ * Usage: !theme type (OP | ED) title
  */
 const { Command } = require('discord.js-commando')
 const fetch = require('node-fetch')

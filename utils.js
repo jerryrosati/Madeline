@@ -27,7 +27,7 @@ module.exports = {
      * @param {*} error The error that occurred.
      */
     logError(message, error) {
-        message.channel.send(`<@${config.dev_id}> Madeline has encountered an error and is shutting down for now.`)
+        message.channel.send(`<@${config.devID}> Madeline has encountered an error and is shutting down for now.`)
         console.log(error)
     },
 
