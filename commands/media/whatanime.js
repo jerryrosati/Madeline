@@ -4,15 +4,21 @@
  * Usage: !whatanime (with image attached to discord message)
  */
 const utils = require('./../../utils.js')
+const MediaQueries = require('./../../MediaQueries.js')
 const fetch = require('node-fetch')
+const { Command } = require('discord.js-commando')
 
-module.exports = {
-    name: 'whatanime',
-    description: 'Check what anime with a gif or image.',
-    usage: '(gif needs to be attached)',
-    args: false,
+module.exports = class WhatAnimeCommand extends Command {
+    constructor(client) {
+        super(client, {
+            name: 'whatanime',
+            group: 'media',
+            memberName: 'whatanime',
+            description: 'Searches trace.moe for a picture to figure out what anime it is, and then searches retrieves info on that anime.',
+        })
+    }
 
-    execute(message, args) {
+    async run(message) {
         // Exit if message doesn't have any attachments.
         if (!message.attachments.array().length) {
             message.reply('Couldn\'t search :( Need an image attachment.')
@@ -28,43 +34,6 @@ module.exports = {
             return
         }
 
-        // Anilist query
-        const query = `
-        query ($id: Int, $page: Int, $perPage: Int, $search: String) {
-            Page (page: $page, perPage: $perPage) {
-                pageInfo {
-                    total
-                    currentPage
-                    lastPage
-                    hasNextPage
-                    perPage
-                }
-                media (id: $id, search: $search, type: ANIME) {
-                    id
-                    title {
-                        romaji
-                    }
-                    coverImage {
-                        extraLarge
-                        color
-                    }
-                    bannerImage
-                    description(asHtml: false)
-                    episodes
-                    status
-                    genres
-                    season
-                    seasonYear
-                    studios(isMain: true) {
-                        nodes {
-                            name
-                        }
-                    }
-                }
-            }
-        }
-        `
-
         const traceMoeUrl = `https://trace.moe/api/search?url=${attachedImageUrl}`
         const traceMoeOptions = {
             method: 'POST',
@@ -76,7 +45,7 @@ module.exports = {
 
         fetch(traceMoeUrl, traceMoeOptions)
             .then(response => response.json())
-            .then(json => {
+            .then(async json => {
                 const animeTitle = json.docs[0].title_english
 
                 // Round to 2 decimal places.
@@ -91,26 +60,13 @@ module.exports = {
                     perPage: 3
                 }
 
-                // Anilist query url
-                const url = 'https://graphql.anilist.co'
-                const options = {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Accept: 'application/json'
-                    },
-                    body: JSON.stringify({
-                        query: query,
-                        variables: variables
-                    })
-                }
-                return fetch(url, options)
-            }).then(response => response.json()
-                .then(json => response.ok ? json : Promise.reject(json)))
+                // Search anilist for the anime.
+                return MediaQueries.performAnimeQuery(variables)
+            }).then(response => response.json().then(json => response.ok ? json : Promise.reject(json)))
             .then(json => {
                 console.log(JSON.stringify(json, null, 3))
                 const series = json.data.Page.media[0]
-                utils.sendAnimeSeriesEmbed(series, message)
+                message.embed(utils.generateAnimeSeriesEmbed(series))
             }).catch(error => {
                 console.error(error)
                 message.reply('Failed to get anime :(')
