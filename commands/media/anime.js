@@ -6,7 +6,7 @@
  */
 
 const utils = require('./../../utils.js')
-const { ANIME_QUERY } = require('./../../constants.js')
+const MediaQueries = require('./../../MediaQueries.js')
 const { Command } = require('discord.js-commando')
 
 module.exports = class AnimeCommand extends Command {
@@ -34,7 +34,7 @@ module.exports = class AnimeCommand extends Command {
         }
 
         // Query anilist with the name of the anime.
-        const response = await utils.queryAnilist(ANIME_QUERY, variables)
+        const response = await MediaQueries.performAnimeQuery(variables)
         const json = await response.json()
         console.log(JSON.stringify(json, null, 3))
 

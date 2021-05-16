@@ -5,79 +5,65 @@
  * Example: !staff Rie Takahashi
  */
 const Discord = require('discord.js')
-const utils = require('./../../utils.js')
+const { Command } = require('discord.js-commando')
+const MediaQueries = require('../../MediaQueries.js')
 
-module.exports = {
-    name: 'staff',
-    description: 'Search for staff',
-    args: true,
-    argsOptional: false,
-    usage: 'staff_to_search_for',
-
-    execute(message, args) {
-        // Anilist query
-        const query = `
-        query ($name: String) {
-            Staff(search:$name) {
-                siteUrl
-                description
-                image { large }
-                name { full native }
-                characters(sort: FAVOURITES_DESC) {
-                    edges {
-                        id
-                        node {
-                            id
-                            siteUrl
-                            name { full }
-                            media(sort: POPULARITY_DESC) {
-                                nodes {
-                                    title { romaji }
-                                    siteUrl
-                                }
-                            }
-                        }
-                    }
+module.exports = class StaffCommand extends Command {
+    constructor(client) {
+        super(client, {
+            name: 'staff',
+            group: 'media',
+            memberName: 'staff',
+            description: 'Searches anilist for a staff person and displays information about them.',
+            args: [
+                {
+                    key: 'name',
+                    prompt: 'What name do you want to search for?',
+                    type: 'string'
                 }
-            }
-        }`
+            ]
+        })
+    }
 
-        // Anilist query variables
+    async run(message, { name }) {
         const variables = {
-            name: args.join(' ')
+            name: name
         }
 
-        utils.queryAnilist(query, variables)
-            .then(data => {
-                console.log(JSON.stringify(data, null, 3))
-                const staff = data.data.Staff
-                let desc = staff.description
-                const characters = staff.characters.edges
+        // Query anilist with the name of the staff.
+        const response = await MediaQueries.performStaffQuery(variables)
+        const json = await response.json()
+        console.log(JSON.stringify(json, null, 3))
 
-                const embed = new Discord.MessageEmbed()
-                    .setTitle(`${staff.name.full} ( ${staff.name.native} )`)
-                    .setURL(staff.siteUrl)
-                    .setThumbnail(staff.image.large)
+        // Generate an embed with the anime information.
+        const staff = json.data.Staff
+        let desc = staff.description
+        const characters = staff.characters.edges
 
-                // Limit the description to 2048 characters if there's a description.
-                if (desc) {
-                    if (desc.length > 2048) {
-                        desc = desc.slice(0, 2045) + '...'
-                    }
-                    embed.setDescription(desc.replace(/(<([^>]+)>)/g, ''))
-                }
+        const embed = new Discord.MessageEmbed()
+            .setTitle(`${staff.name.full} ( ${staff.name.native} )`)
+            .setURL(staff.siteUrl)
+            .setThumbnail(staff.image.large)
 
-                // If the staff has played any character roles, add those to the embed.
-                if (characters.length) {
-                    const roles = characters.slice(0, 5)
-                        .flatMap(edge => `[${edge.node.name.full}](${edge.node.siteUrl}) | [${edge.node.media.nodes[0].title.romaji}](${edge.node.media.nodes[0].siteUrl})`)
-                        .join('\n')
+        // Limit the description to 2048 characters if there's a description.
+        if (desc) {
+            if (desc.length > 2048) {
+                desc = desc.slice(0, 2045) + '...'
+            }
+            embed.setDescription(desc.replace(/(<([^>]+)>)/g, ''))
+        }
 
-                    embed.addFields(
-                        { name: 'Roles', value: roles, inline: true }
-                    )
-                }
-                message.channel.send(embed)
-            }).catch(error => console.error(error))
+        // If the staff has played any character roles, add those to the embed.
+        if (characters.length) {
+            const roles = characters.slice(0, 5)
+                .flatMap(edge => `[${edge.node.name.full}](${edge.node.siteUrl}) | [${edge.node.media.nodes[0].title.romaji}](${edge.node.media.nodes[0].siteUrl})`)
+                .join('\n')
+
+            embed.addFields(
+                { name: 'Roles', value: roles, inline: true }
+            )
+        }
+
+        return message.embed(embed)
     }
 }

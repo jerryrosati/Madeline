@@ -3,41 +3,44 @@
  *
  * Usage: !theme title [-t OP|ED[number]]
  */
+const { Command } = require('discord.js-commando')
 const fetch = require('node-fetch')
 
-module.exports = {
-    name: 'theme',
-    description: 'Search for anime theme',
-    usage: 'anime_title [-t OP|ED [-n number]]',
-    args: true,
-    argsOptional: false,
-
-    execute(message, args) {
-        const typeFlagIndex = args.indexOf('-t')
-        let type = 'OP'
-        let themeNum = 1
-
-        // Parse the arguments to look at whether an OP or ED is being requested, and the number of the OP/ED.
-        // Users can enter the OP or ED option in the format OPn or EDn where n is an integer.
-        if (typeFlagIndex !== -1) {
-            const matches = args[typeFlagIndex + 1].toLowerCase().match(/(op|ed)([\d]*)/)
-            if (typeFlagIndex < args.length - 1 && matches) {
-                type = matches[1]
-                if (matches.length > 2 && matches[2]) {
-                    themeNum = Number(matches[2])
+module.exports = class ThemeCommand extends Command {
+    constructor(client) {
+        super(client, {
+            name: 'theme',
+            group: 'media',
+            memberName: 'theme',
+            description: 'Search for an anime theme (op/ed).',
+            args: [
+                {
+                    key: 'type',
+                    prompt: 'Do you want to search for an OP or an ED?',
+                    type: 'string',
+                    oneOf: ['OP', 'ED', 'op', 'ed', 'Op', 'Ed', 'oP', 'eD']
+                },
+                {
+                    key: 'number',
+                    prompt: 'What number theme do you want to search for in the series? (1, 2, 3 ...)',
+                    type: 'string'
+                },
+                {
+                    key: 'title',
+                    prompt: 'What title do you want to search for?',
+                    type: 'string'
                 }
-                args.splice(typeFlagIndex, 2)
-            } else {
-                args.splice(typeFlagIndex, 1)
-            }
-        }
+            ]
+        })
+    }
 
-        const seriesTitle = args.join(' ')
+    async run(message, { type, number, title }) {
+        const seriesTitle = title
         console.log(`title: ${seriesTitle}`)
-        console.log(`type = ${type}, number = ${themeNum}`)
+        console.log(`type = ${type}, number = ${number}`)
 
         // The query variables.
-        const animeThemesUrl = `https://staging.animethemes.moe/api/search?q=${seriesTitle}&fields[search]=anime&include=themes.entries.videos&limit=1`
+        const animeThemesUrl = `https://staging.animethemes.moe/api/search?q=${title}&fields[search]=anime&include=themes.entries.videos&limit=1`
         const queryOptions = {
             method: 'GET',
             headers: {
@@ -46,14 +49,14 @@ module.exports = {
             }
         }
 
-        // Fetch the theme from the site and send it to the channel as a reply.
-        console.log(`Querying url: ${animeThemesUrl}`)
+        console.log(`query url = ${animeThemesUrl}`)
+
         fetch(animeThemesUrl, queryOptions)
             .then(response => response.json())
             .then(json => {
                 // Filter the JSON response and look for the correct OP/ED.
                 const themeList = json.search.anime[0].themes.filter(theme => theme.type === type.toUpperCase())
-                const theme = themeList.length === 1 ? themeList[0] : themeList.filter(theme => theme.sequence == themeNum)[0]
+                const theme = themeList.length === 1 ? themeList[0] : themeList.filter(theme => theme.sequence == number)[0]
                 console.log(JSON.stringify(theme, null, 3))
 
                 // Get the filename of the theme video file and send the link to the channel.

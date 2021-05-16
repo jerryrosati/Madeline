@@ -4,7 +4,7 @@
 const config = require('./config.json')
 const Discord = require('discord.js')
 const fetch = require('node-fetch')
-const { ANILIST_QUERY_URL } = require('./constants.js')
+const { ANILIST_ENDPOINT: ANILIST_QUERY_URL } = require('./constants.js')
 const { Subject } = require('rxjs')
 
 // Subject that emits identifiers for !bee instances to stop.
@@ -94,6 +94,33 @@ module.exports = {
                 { name: 'Studio', value: series.studios.nodes.map(studio => studio.name), inline: true }
             )
         }
+        return embed
+    },
+
+    generateMangaSeriesEmbed(series) {
+        const embed = new Discord.MessageEmbed()
+            .setColor(series.coverImage.color)
+            .setThumbnail(series.coverImage.extraLarge)
+            .setTitle(series.title.romaji)
+            .setURL(series.siteUrl)
+            .setDescription(series.description.replace(/(<([^>]+)>)/g, '')) // Remove html tags from the description.
+            .setImage(series.bannerImage)
+            .addFields(
+                { name: 'Genres', value: series.genres, inline: true },
+                { name: 'Status', value: this.capitalizeFirstLetter(series.status), inline: true }
+            )
+
+        if (series.status.toLowerCase() === 'finished') {
+            embed.addFields(
+                { name: 'Chapters', value: series.chapters, inline: true },
+                { name: 'Volumes', value: series.volumes, inline: true }
+            )
+        }
+
+        series.staff.edges.forEach(staff => {
+            embed.addField(staff.role, `[${staff.node.name.full}](${staff.node.siteUrl})`, true)
+        })
+
         return embed
     },
 

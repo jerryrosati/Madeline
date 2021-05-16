@@ -92,7 +92,7 @@ client.once('ready', () => {
     }
 }) */
 
-client.on('error', console.error)
+client.on('error', error => console.error(error))
 
 // Login to discord with the token
 client.login(token)
