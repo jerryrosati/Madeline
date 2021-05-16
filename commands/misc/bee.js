@@ -8,25 +8,29 @@ const utils = require('./../../utils')
 const config = require('./../../config.json')
 const { Observable, zip, interval } = require('rxjs')
 const { take, map, filter } = require('rxjs/operators')
+const { Command } = require('discord.js-commando')
 
-module.exports = {
-    name: 'bee',
-    description: 'Tell me a story, Madeline',
-    usage: '[identifier]',
-    args: true,
-    argsOptional: true,
+module.exports = class BeeCommand extends Command {
+    constructor(client) {
+        super(client, {
+            name: 'bee',
+            group: 'misc',
+            memberName: 'bee',
+            description: 'Tell me a story, Madeline.',
+            args: [
+                {
+                    key: 'identifier',
+                    prompt: 'What is the identifier for your bee movie script instance?',
+                    type: 'string',
+                    default: ''
+                }
+            ]
+        })
+    }
 
-    execute(message, args) {
+    run(message, { identifier }) {
         let observable
         let subscription
-        let identifier = ''
-
-        if (args.length > 0) {
-            identifier = args[0]
-
-            // Tell the user what their identifier is.
-            message.reply(`Your safe word is ${identifier}`)
-        }
 
         // Read in the script.
         fs.readFile(config.bee_movie_script_path, 'utf8', (err, data) => {

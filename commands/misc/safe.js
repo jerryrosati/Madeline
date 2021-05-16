@@ -3,21 +3,30 @@
  *
  * Usage: !safe [identifier]
  */
+const { Command } = require('discord.js-commando')
 const utils = require('./../../utils.js')
 
-module.exports = {
-    name: 'safe',
-    description: 'Stops the !bee command',
-    usage: '[identifier]',
-    args: true,
-    argsOptional: true,
+module.exports = class SafeCommand extends Command {
+    constructor(client) {
+        super(client, {
+            name: 'safe',
+            group: 'misc',
+            memberName: 'safe',
+            description: 'Stops a bee movie script instance.',
+            args: [
+                {
+                    key: 'identifier',
+                    prompt: 'What is the identifier of the bee movie script instance you want to stop?',
+                    type: 'string',
+                    default: ''
+                }
+            ]
+        })
+    }
 
-    execute(message, args) {
-        let identifier
-        if (args.length === 0) {
+    run(message, { identifier }) {
+        if (!identifier) {
             identifier = 'all'
-        } else {
-            identifier = args[0]
         }
 
         // Send the identifier to all observers.
