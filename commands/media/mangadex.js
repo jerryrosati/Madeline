@@ -3,26 +3,36 @@
  */
 const fetch = require('node-fetch')
 const Discord = require('discord.js')
-const utils = require('./../../utils.js')
 const { URL, URLSearchParams } = require('url')
+const { Command } = require('discord.js-commando')
 
-module.exports = {
-    name: 'mangadex',
-    description: 'Read mangadex chapters',
-    usage: 'mangadex chapter_num series_title',
-    args: true,
-    argsOptional: false,
+module.exports = class MangaDexCommand extends Command {
+    constructor(client) {
+        super(client, {
+            name: 'mangadex',
+            group: 'media',
+            memberName: 'mangadex',
+            description: 'Read a manga chapter on mangadex.',
+            args : [
+                {
+                    key: 'chapterNum',
+                    prompt: 'What chapter do you want to read?',
+                    type: 'string'
+                },
+                {
+                    key: 'title',
+                    prompt: 'What series do you want to read?',
+                    type: 'string'
+                }
+            ]
+        })
+    }
 
-    execute(message, args) {
-        if (args < 2) {
-            utils.reportCommandUsageError(this, message, 'Not enough arguments')
-            return
-        }
-
+    async run(message, { chapterNum, title }) {
         const reactEmoji = ['⏮', '⏭']
 
         const mangaVariables = {
-            title: args.slice(1),
+            title: title,
             limit: 1
         }
 
@@ -30,7 +40,7 @@ module.exports = {
         mangaEndpoint.search = new URLSearchParams(mangaVariables).toString()
 
         const mangaFeedVariables = {
-            chapter: args[0],
+            chapter: chapterNum,
             manga: ''
         }
 
