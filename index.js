@@ -4,11 +4,30 @@
 
 const fs = require('fs')
 const utils = require('./utils.js')
-const { prefix, token, defaultBroadcastChannelName } = require('./config.json')
+const { prefix, dev_id, token, defaultBroadcastChannelName } = require('./config.json')
+const { CommandoClient } = require('discord.js-commando')
 const Discord = require('discord.js')
+const path = require('path')
 
 // Create a new discord client
-const client = new Discord.Client({ partials: ['USER', 'GUILD_MEMBER'] })
+const client = new CommandoClient({
+    commandPrefix: prefix,
+    owner: dev_id
+})
+
+client.registry
+    .registerDefaultTypes()
+    .registerGroups([
+        ['admin', 'Admin commands'],
+        ['media', 'Commands related to media (anime, manga, etc.)'],
+        ['utility', 'Utility commands'],
+        ['misc', 'Other commands']
+    ])
+    .registerDefaultGroups()
+    .registerDefaultCommands()
+    .registerCommandsIn(path.join(__dirname, 'commands'))
+
+/* // const client = new Discord.Client({ partials: ['USER', 'GUILD_MEMBER'] })
 client.commands = new Discord.Collection()
 
 // Saves an array of all files in the commands folder that end in '.js'.
@@ -17,16 +36,17 @@ const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('
 for (const file of commandFiles) {
     const command = require(`./commands/${file}`)
     client.commands.set(command.name, command)
-}
+} */
 
 // When the client is ready, run this code
 // This event will only trigger one time after logging in
 client.once('ready', () => {
     console.log('Ready!')
+    client.user.setActivity('In dev')
 })
 
 // Execute commands
-client.on('message', async message => {
+/* client.on('message', async message => {
     if (message.channel.name === defaultBroadcastChannelName && !message.author.bot) {
         if (client.commands.has('broadcast')) {
             client.commands.get('broadcast').execute(message, message.content.match(/[^\s"]+|"([^"]*)"/g))
@@ -70,7 +90,9 @@ client.on('message', async message => {
         console.error(error)
         message.reply('There was an error trying to execute that command!')
     }
-})
+}) */
+
+client.on('error', console.error)
 
 // Login to discord with the token
 client.login(token)

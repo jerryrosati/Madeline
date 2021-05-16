@@ -6,7 +6,7 @@
  * Example: !schedule 6/6/2020 16:30
  */
 const schedule = require('node-schedule')
-const utils = require('./../utils.js')
+const utils = require('./../../utils.js')
 
 module.exports = {
     name: 'schedule',

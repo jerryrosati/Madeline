@@ -1,11 +1,11 @@
 /**
- * Broadcast command. Sends a message to all channels with the name specified in the config.json.
+ * Broadcast command. Sends a message to all channels with the name specified in the ../config.json.
  *
  * Usage: !broadcast message_text
  * Example: !broadcast This is a test
  */
-const { dev_id, statusChannelName, updatesChannelName, defaultBroadcastChannelName } = require('./../config.json')
-const utils = require('./../utils.js')
+const { dev_id, statusChannelName, updatesChannelName, defaultBroadcastChannelName } = require('./../../config.json')
+const utils = require('./../../utils.js')
 const Discord = require('discord.js')
 
 /* eslint-disable quote-props */

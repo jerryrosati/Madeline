@@ -4,8 +4,8 @@
  * Usage: !bee [identifier]
  */
 const fs = require('fs')
-const utils = require('../utils')
-const config = require('../config.json')
+const utils = require('./../../utils')
+const config = require('./../../config.json')
 const { Observable, zip, interval } = require('rxjs')
 const { take, map, filter } = require('rxjs/operators')
 

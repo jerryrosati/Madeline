@@ -3,7 +3,7 @@
  *
  * Usage: !whatanime (with image attached to discord message)
  */
-const utils = require('./../utils.js')
+const utils = require('./../../utils.js')
 const fetch = require('node-fetch')
 
 module.exports = {

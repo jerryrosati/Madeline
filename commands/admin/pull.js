@@ -3,7 +3,7 @@
  *
  * Performs a git pull.
  */
-const config = require('../config.json')
+const config = require('./../../config.json')
 const { exec } = require('child_process')
 
 module.exports = {

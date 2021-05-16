@@ -3,7 +3,7 @@
  */
 const fetch = require('node-fetch')
 const Discord = require('discord.js')
-const utils = require('./../utils.js')
+const utils = require('./../../utils.js')
 const { URL, URLSearchParams } = require('url')
 
 module.exports = {

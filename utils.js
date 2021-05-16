@@ -54,7 +54,7 @@ module.exports = {
      * @param {String} query The anilist query.
      * @param {*} variables
      */
-    queryAnilist(query, variables) {
+    async queryAnilist(query, variables) {
         const options = {
             method: 'POST',
             headers: {
@@ -65,8 +65,6 @@ module.exports = {
         }
 
         return fetch(ANILIST_QUERY_URL, options)
-            .then(response => response.json()
-                .then(json => response.ok ? json : Promise.reject(json)))
     },
 
     /**
@@ -75,7 +73,7 @@ module.exports = {
      * @param {Media} series The anime series
      * @param {Message} message The message containing the original command.
      */
-    sendAnimeSeriesEmbed(series, message) {
+    generateAnimeSeriesEmbed(series) {
         const embed = new Discord.MessageEmbed()
             .setColor(series.coverImage.color)
             .setThumbnail(series.coverImage.extraLarge)
@@ -96,7 +94,7 @@ module.exports = {
                 { name: 'Studio', value: series.studios.nodes.map(studio => studio.name), inline: true }
             )
         }
-        message.channel.send(embed)
+        return embed
     },
 
     /**
