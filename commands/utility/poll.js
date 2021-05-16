@@ -5,37 +5,49 @@
  * Example: !poll "What day should we play?" Monday Tuesday Wednesday
  */
 const Discord = require('discord.js')
-const utils = require('./../../utils')
+const { Command } = require('discord.js-commando')
 
-module.exports = {
-    name: 'poll',
-    description: 'Create a poll',
-    usage: '"Poll text" option1 option2 [option3 ... option10]',
-    args: true,
-    argsOptional: false,
+module.exports = class PollCommand extends Command {
+    constructor(client) {
+        super(client, {
+            name: 'poll',
+            group: 'utility',
+            memberName: 'poll',
+            description: 'Make a poll.',
+            args: [
+                {
+                    key: 'name',
+                    prompt: 'What should the name of the poll be?',
+                    type: 'string'
+                },
+                {
+                    key: 'options',
+                    prompt: 'What options should the poll have?',
+                    type: 'string'
+                }
+            ]
+        })
+    }
 
-    execute(message, args) {
+    run(message, { name, options }) {
         const emojis = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟']
         const checkMark = '✅'
 
-        if (args.length < 3) {
-            utils.reportCommandUsageError(this, message, 'Polls must have a description and at least 2 options')
-            return
-        } else if (args.length > 11) {
-            utils.reportCommandUsageError(this, message, 'Polls can only have up to 10 options')
-            return
-        }
+        console.log(`name = ${name}`)
+        console.log(`options = ${options}`)
+        const pollOptions = options.split(' ')
+        console.log(`pollOptions = ${pollOptions}`)
 
-        const reactEmojis = emojis.slice(0, args.length - 1)
+        const reactEmojis = emojis.slice(0, pollOptions.length)
         reactEmojis.push(checkMark)
 
         let desc = ''
-        for (let i = 1; i < args.length; i++) {
-            desc += `${emojis[i - 1]}: ${args[i]}\n\n`
+        for (let i = 0; i < pollOptions.length; i++) {
+            desc += `${emojis[i]}: ${pollOptions[i]}\n\n`
         }
 
         const embed = new Discord.MessageEmbed()
-            .setTitle(`Poll: ${args[0]}`)
+            .setTitle(`Poll: ${name}`)
             .addFields({ name: 'Options', value: desc, inline: true })
 
         // Send the message with the poll embed.
@@ -44,7 +56,7 @@ module.exports = {
                 reactEmojis.forEach(emoji => embedMessage.react(emoji))
 
                 const filter = (reaction, user) => {
-                    return emojis.slice(0, args.length - 1).includes(reaction.emoji.name) ||
+                    return emojis.slice(0, pollOptions.length - 1).includes(reaction.emoji.name) ||
                         (reaction.emoji.name === checkMark && user.id === message.author.id)
                 }
 
@@ -77,7 +89,7 @@ module.exports = {
                     const winner = collected.filter(r => r.emoji.name !== checkMark).sort((r1, r2) => r2.count - r1.count).first()
                     collected.forEach(reaction => console.log(`${reaction.emoji.name}, ${reaction.count}`))
                     console.log(`Length of emojis: ${collected.filter(reaction => reaction.emoji.name !== checkMark).size} `)
-                    message.reply(`Winner for Poll ${args[0]}: ${winner.emoji.name}`)
+                    message.reply(`Winner for Poll ${pollOptions[0]}: ${winner.emoji.name}`)
                 })
             })
             .catch(console.error)
