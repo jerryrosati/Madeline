@@ -4,8 +4,8 @@
  * Usage: !manga TITLE
  */
 
-const utils = require('./../../utils.js')
-const MediaQueries = require('./../../MediaQueries.js')
+const utils = require('../../utils/utils.js')
+const MediaQueries = require('../../utils/MediaQueries.js')
 const { Command } = require('discord.js-commando')
 
 module.exports = class MangaCommand extends Command {

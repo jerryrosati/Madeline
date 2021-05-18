@@ -3,8 +3,8 @@
  *
  * Usage: !whatanime (with image attached to discord message)
  */
-const utils = require('./../../utils.js')
-const MediaQueries = require('./../../MediaQueries.js')
+const utils = require('../../utils/utils.js')
+const MediaQueries = require('../../utils/MediaQueries.js')
 const fetch = require('node-fetch')
 const { Command } = require('discord.js-commando')
 

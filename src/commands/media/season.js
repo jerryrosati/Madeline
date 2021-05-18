@@ -7,7 +7,7 @@
  *    !season winter 2020 (gets anime from the winter 2020 season)
  */
 const Discord = require('discord.js')
-const utils = require('../../utils.js')
+const utils = require('../../utils/utils.js')
 const { Command } = require('discord.js-commando')
 
 module.exports = class SeasonCommand extends Command {

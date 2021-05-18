@@ -2,7 +2,7 @@
  * Broadcast command. Sends a message to all channels with the name specified in the config.json.
  *
  */
-const { defaultBroadcastChannelName } = require('./../../config.json')
+const { defaultBroadcastChannelName } = require('../../../config.json')
 const Discord = require('discord.js')
 const { Command } = require('discord.js-commando')
 

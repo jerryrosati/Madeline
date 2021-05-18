@@ -1,10 +1,10 @@
 /**
  * Utility functions.
  */
-const config = require('./config.json')
+const config = require('../../config.json')
 const Discord = require('discord.js')
 const fetch = require('node-fetch')
-const { ANILIST_ENDPOINT: ANILIST_QUERY_URL } = require('./constants.js')
+const { ANILIST_QUERY_URL } = require('./../constants.js')
 const { Subject } = require('rxjs')
 
 // Subject that emits identifiers for !bee instances to stop.

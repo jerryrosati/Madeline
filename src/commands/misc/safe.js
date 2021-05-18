@@ -4,7 +4,7 @@
  * Usage: !safe [identifier]
  */
 const { Command } = require('discord.js-commando')
-const utils = require('./../../utils.js')
+const utils = require('../../utils/utils.js')
 
 module.exports = class SafeCommand extends Command {
     constructor(client) {

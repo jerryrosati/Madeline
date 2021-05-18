@@ -4,7 +4,7 @@
  * Usage: !announce <change|status> message
  * Example: !announce status Madeline is up and running.
  */
-const { statusChannelName, updatesChannelName } = require('./../../config.json')
+const { statusChannelName, updatesChannelName } = require('../../../config.json')
 const Discord = require('discord.js')
 const { Command } = require('discord.js-commando')
 

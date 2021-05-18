@@ -6,7 +6,7 @@
  */
 const Discord = require('discord.js')
 const { Command } = require('discord.js-commando')
-const MediaQueries = require('../../MediaQueries.js')
+const MediaQueries = require('../../utils/MediaQueries.js')
 
 module.exports = class StaffCommand extends Command {
     constructor(client) {

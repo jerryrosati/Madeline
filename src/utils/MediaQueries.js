@@ -2,7 +2,7 @@
  * Contains queries used in media commands.
  */
 const fetch = require('node-fetch')
-const constants = require('./constants.js')
+const constants = require('../constants.js')
 
 module.exports = class MediaQueries {
     static async performAnimeQuery(variables) {
