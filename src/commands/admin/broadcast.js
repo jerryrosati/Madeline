@@ -44,7 +44,7 @@ module.exports = class BroadcastCommand extends Command {
 
                         guild.channels.cache
                             .filter(channel => channel.name === channelName)
-                            .each(channel => channel.embed(embed))
+                            .each(channel => channel.send(embed))
                     })
             })
             .catch(error => {
