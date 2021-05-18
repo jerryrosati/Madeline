@@ -27,7 +27,7 @@ client.registry
 // Triggered when the client is ready, which will happen once after login.
 client.once('ready', () => {
     console.log('Ready!')
-    client.user.setActivity('In dev')
+    client.user.setActivity('the chat zoom by', { type: 'WATCHING' })
 })
 
 // Triggered when a message is sent.
