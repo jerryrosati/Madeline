@@ -13,7 +13,7 @@ module.exports = class MangaDexCommand extends Command {
             group: 'media',
             memberName: 'mangadex',
             description: 'Read a manga chapter on mangadex.',
-            args : [
+            args: [
                 {
                     key: 'chapterNum',
                     prompt: 'What chapter do you want to read?',

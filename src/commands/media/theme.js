@@ -21,14 +21,15 @@ module.exports = class ThemeCommand extends Command {
                     oneOf: ['OP', 'ED', 'op', 'ed', 'Op', 'Ed', 'oP', 'eD']
                 },
                 {
-                    key: 'number',
-                    prompt: 'What number theme do you want to search for in the series? (1, 2, 3 ...)',
-                    type: 'string'
-                },
-                {
                     key: 'title',
                     prompt: 'What title do you want to search for?',
                     type: 'string'
+                },
+                {
+                    key: 'number',
+                    prompt: 'What number theme do you want to search for in the series? (1, 2, 3 ...)',
+                    type: 'integer',
+                    default: 1
                 }
             ]
         })
