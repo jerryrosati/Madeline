@@ -3,8 +3,10 @@
  *
  * Usage: !purge 20
  */
+const { purgeLogChannelName } = require('../../../config.json')
 const { Command, ArgumentCollector } = require('discord.js-commando')
 const Discord = require('discord.js')
+
 module.exports = class PurgeCommand extends Command {
     constructor(client) {
         super(client, {
@@ -111,14 +113,19 @@ module.exports = class PurgeCommand extends Command {
 
         message.guild.members.fetch(message.author.id)
             .then(member => {
-                embed.setAuthor(`${amount} messages deleted by ${member.user.tag}`, member.user.avatarURL())
+                embed.setTitle(`${amount} messages purged in #${message.channel.name}`)
+                embed.setAuthor(`${member.user.tag}`, member.user.avatarURL())
                 embed.setColor(member.displayColor)
 
+                // Log it to the purge-log channel within the server where the purge message was sent.
                 message.client.guilds.cache
-                    .filter(guild => guild.available)
+                    .filter(guild => guild.available && guild.id === message.guild.id)
                     .each(guild => {
+                        console.log(`Guild name: ${guild.name}`)
+                        console.log(`id = ${message.author.id}`)
+
                         guild.channels.cache
-                            .filter(channel => channel.name === 'purge-log')
+                            .filter(channel => channel.name === purgeLogChannelName)
                             .each(channel => channel.send(embed))
                     })
             })
