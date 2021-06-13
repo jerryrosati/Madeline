@@ -3,7 +3,7 @@
  *
  * Usage: !purge 20
  */
-const { Command } = require('discord.js-commando')
+const { Command, ArgumentCollector } = require('discord.js-commando')
 const Discord = require('discord.js')
 module.exports = class PurgeCommand extends Command {
     constructor(client) {
@@ -18,39 +18,74 @@ module.exports = class PurgeCommand extends Command {
                     key: 'amount',
                     prompt: 'How many messages would you like to delete?',
                     type: 'integer'
-                },
-                {
-                    key: 'confirmation',
-                    prompt: 'Are you sure you want to delete that many messages? Type "yes" to confirm.',
-                    type: 'string'
                 }
             ]
         })
     }
 
-    async run(message, { amount, confirmation }) {
-        if (confirmation !== 'yes') {
+    async run(message, { amount }, fromPattern, result) {
+        // Collector for the confirmation argument.
+        const confirmationCollector = new ArgumentCollector(message.client, [
+            {
+                key: 'confirmation',
+                prompt: 'Are you sure you want to delete that many messages? Type "yes" to confirm.',
+                type: 'string'
+            }
+        ])
+
+        // Collect the confirmation argument manually to force a prompt.
+        const confirmation = await confirmationCollector.obtain(message)
+
+        // Exit if the user doesn't confirm.
+        if (confirmation.values.confirmation !== 'yes') {
+            message.reply('Purge was not confirmed by typing \'yes\'; not purging.')
             return
         }
 
-        if (amount > 100) {
-            message.reply('Number of messages to delete must be less than or equal to 100.')
+        // Exit if the user tries to delete more than 90 messages (Discord API's max is 100, so limit to 90
+        // to account for the extra prompt and answer messages being deleted).
+        if (amount > 90) {
+            message.reply('Number of messages to delete must be less than or equal to 95.')
             return
         }
 
-        console.log(`Messages to delete: ${amount}`)
+        console.log(`Number of messages to delete: ${amount}`)
 
         try {
-            // Fetch the list of messages to delete. Add 3 to account for the message with the purge command,
-            // Madeline's confirmation message, and then the user's confirmation message
-            const messagesToDelete = await message.channel.messages.fetch({ limit: amount + 3 })
+            // Fetch the list of messages to delete.
+            const messagesToDelete = await message.channel.messages.fetch({ limit: amount, before: message.id })
             console.log(`messageToDelete size = ${messagesToDelete.size}`)
 
-            // Delete the messages.
+            // Delete the original purge message.
+            message.delete()
+
+            // Delete the messages the user wants to delete.
             const deletedMessages = await message.channel.bulkDelete(messagesToDelete)
 
-            // Log the purge to the console and to the purge-log channel.
-            console.log(`Bulk deleted ${deletedMessages.size} messages (${amount} + ${deletedMessages.size - amount}) from channel ${message.channel.name}.`)
+            // Delete the user's prompt answer messages.
+            const deletedAnswers = await message.channel.bulkDelete(result.answers)
+            const deletedConfirmationAnswers = await message.channel.bulkDelete(confirmation.answers)
+
+            // Delete Madeline's prompt messages.
+            const deletedPrompts = await message.channel.bulkDelete(result.prompts)
+            const deletedConfirmationPrompts = await message.channel.bulkDelete(confirmation.prompts)
+
+            // Log purged message statistics to the terminal.
+            const totalDeleted = deletedMessages.size +
+                deletedAnswers.size +
+                deletedConfirmationAnswers.size +
+                deletedPrompts.size +
+                deletedConfirmationPrompts.size
+
+            console.log(`Number of messages to delete:
+                Deleted messages from purge command: ${deletedMessages.size}
+                Deleted user answers for amount arg: ${deletedAnswers.size}
+                Deleted Madeline prompts for amount arg: ${deletedPrompts.size}
+                Deleted user answers for confirmation arg: ${deletedConfirmationAnswers.size}
+                Deleted Madeline prompts for amount arg: ${deletedConfirmationPrompts.size}`)
+            console.log(`Bulk deleted ${totalDeleted} messages from channel ${message.channel.name}.`)
+
+            // Log purged messages to the channel.
             this.logPurge(message, messagesToDelete, amount)
         } catch (error) {
             console.error(error)
@@ -58,6 +93,12 @@ module.exports = class PurgeCommand extends Command {
         }
     }
 
+    /**
+     * Logs the purged messages in a channel and to the terminal.
+     * @param {*} message The purge message.
+     * @param {*} messagesToDelete The list of messages that will be deleted by the purge (doesn't include prompts or answers for the purge command).
+     * @param {*} amount The amount of messages to delete.
+     */
     logPurge(message, messagesToDelete, amount) {
         const messageText = messagesToDelete
             .sort((messageA, messageB) => messageA.createdTimestamp - messageB.createdTimestamp)
