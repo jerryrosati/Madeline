@@ -65,6 +65,11 @@ module.exports = class WhatAnimeCommand extends Command {
             }).then(response => response.json().then(json => response.ok ? json : Promise.reject(json)))
             .then(json => {
                 console.log(JSON.stringify(json, null, 3))
+
+                if (!json.data.Page.media[0]) {
+                    message.reply('Couldn\'t find any anime series on anilist matching that title :(')
+                    return
+                }
                 const series = json.data.Page.media[0]
                 message.embed(utils.generateAnimeSeriesEmbed(series))
             }).catch(error => {

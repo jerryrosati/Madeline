@@ -35,8 +35,13 @@ module.exports = class StaffCommand extends Command {
         const json = await response.json()
         console.log(JSON.stringify(json, null, 3))
 
-        // Generate an embed with the anime information.
+        // If any staff members were retrieved, generate an embed with the anime information.
         const staff = json.data.Staff
+        if (!staff || !staff.length) {
+            message.reply('Couldn\'t find any staff members with that name :(')
+            return
+        }
+
         let desc = staff.description
         const characters = staff.characters.edges
 

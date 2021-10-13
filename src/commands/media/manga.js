@@ -38,7 +38,11 @@ module.exports = class MangaCommand extends Command {
         const json = await response.json()
         console.log(JSON.stringify(json, null, 3))
 
-        // Generate an embed with the anime information.
+        // Generate an embed with the manga information, if any series were retrieved.
+        if (!json.data.Page.media || !json.data.Page.media.length) {
+            message.reply('Couldn\'t find any manga with that name :(')
+            return
+        }
         const series = json.data.Page.media[0]
         const embed = utils.generateMangaSeriesEmbed(series)
         return message.embed(embed)

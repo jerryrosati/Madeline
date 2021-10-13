@@ -55,10 +55,20 @@ module.exports = class ThemeCommand extends Command {
         fetch(animeThemesUrl, queryOptions)
             .then(response => response.json())
             .then(json => {
+                if (!json.search.anime || !json.search.anime.length || !json.search.anime[0].themes) {
+                    message.reply('Couldn\'t find any themes for series with that name :(')
+                    return
+                }
+
                 // Filter the JSON response and look for the correct OP/ED.
                 const themeList = json.search.anime[0].themes.filter(theme => theme.type === type.toUpperCase())
                 const theme = themeList.length === 1 ? themeList[0] : themeList.filter(theme => theme.sequence == number)[0]
                 console.log(JSON.stringify(theme, null, 3))
+
+                if (!theme.entries || !theme.videos) {
+                    message.reply('Couldn\'t find any themes for series with that name :(')
+                    return
+                }
 
                 // Get the filename of the theme video file and send the link to the channel.
                 const baseName = theme.entries[0].videos[0].basename
