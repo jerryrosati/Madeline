@@ -37,7 +37,7 @@ module.exports = class StaffCommand extends Command {
 
         // If any staff members were retrieved, generate an embed with the anime information.
         const staff = json.data.Staff
-        if (!staff || !staff.length) {
+        if (!staff) {
             message.reply('Couldn\'t find any staff members with that name :(')
             return
         }

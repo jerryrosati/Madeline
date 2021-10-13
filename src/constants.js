@@ -73,7 +73,7 @@ module.exports = {
             description
             image { large }
             name { full native }
-            characters(sort: SEARCH_MATCH) {
+            characters(sort: FAVOURITES_DESC) {
                 edges {
                     id
                     node {
