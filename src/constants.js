@@ -16,7 +16,7 @@ module.exports = {
                 hasNextPage
                 perPage
             }
-            media (id: $id, search: $search, type: ANIME) {
+            media (id: $id, search: $search, type: ANIME, sort: SEARCH_MATCH) {
                 id
                 bannerImage
                 description(asHtml: false)
@@ -43,7 +43,7 @@ module.exports = {
                 hasNextPage
                 perPage
             }
-            media (id: $id, search: $search, type: MANGA, sort: POPULARITY_DESC) {
+            media (id: $id, search: $search, type: MANGA, sort: SEARCH_MATCH) {
                 id
                 bannerImage
                 description(asHtml: false)
@@ -73,7 +73,7 @@ module.exports = {
             description
             image { large }
             name { full native }
-            characters(sort: FAVOURITES_DESC) {
+            characters(sort: SEARCH_MATCH) {
                 edges {
                     id
                     node {
