@@ -6,7 +6,7 @@ module.exports = {
     // Endpoints
     ANILIST_ENDPOINT: 'https://graphql.anilist.co',
 
-    // Query Strings
+    // Anilist Query Strings
     ANILIST_ANIME_QUERY: `query ($id: Int, $page: Int, $perPage: Int, $search: String) {
         Page (page: $page, perPage: $perPage) {
             pageInfo {

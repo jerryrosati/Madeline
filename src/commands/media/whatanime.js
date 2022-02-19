@@ -4,9 +4,10 @@
  * Usage: !whatanime (with image attached to discord message)
  */
 const utils = require('../../utils/utils.js')
-const MediaQueries = require('../../utils/MediaQueries.js')
+const Query = require('../../data/query.js')
 const fetch = require('node-fetch')
 const { Command } = require('discord.js-commando')
+const { QueryTypes } = require('../../data/query-type')
 
 module.exports = class WhatAnimeCommand extends Command {
     constructor(client) {
@@ -61,7 +62,8 @@ module.exports = class WhatAnimeCommand extends Command {
                 }
 
                 // Search anilist for the anime.
-                return MediaQueries.performAnimeQuery(variables)
+                const animeQuery = new Query(QueryTypes.Anime, variables)
+                return animeQuery.performQuery()
             }).then(response => response.json().then(json => response.ok ? json : Promise.reject(json)))
             .then(json => {
                 console.log(JSON.stringify(json, null, 3))

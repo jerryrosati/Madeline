@@ -6,7 +6,8 @@
  */
 const Discord = require('discord.js')
 const { Command } = require('discord.js-commando')
-const MediaQueries = require('../../utils/MediaQueries.js')
+const Query = require('../../data/query.js')
+const { QueryTypes } = require('../../data/query-type')
 
 module.exports = class StaffCommand extends Command {
     constructor(client) {
@@ -31,7 +32,8 @@ module.exports = class StaffCommand extends Command {
         }
 
         // Query anilist with the name of the staff.
-        const response = await MediaQueries.performStaffQuery(variables)
+        const query = new Query(QueryTypes.Staff, variables)
+        const response = await query.performQuery()
         const json = await response.json()
         console.log(JSON.stringify(json, null, 3))
 

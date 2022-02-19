@@ -5,8 +5,9 @@
  */
 
 const utils = require('../../utils/utils.js')
-const MediaQueries = require('../../utils/MediaQueries.js')
+const Query = require('../../data/query.js')
 const { Command } = require('discord.js-commando')
+const { QueryTypes } = require('../../data/query-type')
 
 module.exports = class MangaCommand extends Command {
     constructor(client) {
@@ -34,7 +35,8 @@ module.exports = class MangaCommand extends Command {
         }
 
         // Query anilist with the name of the manga.
-        const response = await MediaQueries.performMangaQuery(variables)
+        const query = new Query(QueryTypes.Manga, variables)
+        const response = await query.performQuery()
         const json = await response.json()
         console.log(JSON.stringify(json, null, 3))
 
