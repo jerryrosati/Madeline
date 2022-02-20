@@ -62,7 +62,7 @@ module.exports = class ThemeCommand extends Command {
 
                 // Filter the JSON response and look for the correct OP/ED.
                 const themeList = json.search.anime[0].themes.filter(theme => theme.type === type.toUpperCase())
-                const theme = themeList.length === 1 ? themeList[0] : themeList.filter(theme => theme.sequence == number)[0]
+                const theme = themeList.length === 1 ? themeList[0] : themeList.filter(theme => theme.sequence === number)[0]
                 console.log(JSON.stringify(theme, null, 3))
 
                 if (!theme.entries || !theme.videos) {
