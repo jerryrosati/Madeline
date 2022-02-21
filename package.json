@@ -1,22 +1,32 @@
 {
-    "name": "madeline",
-    "version": "1.0.0",
-    "description": "First discord bot",
-    "main": "./src/index.js",
-    "author": "Malty",
-    "dependencies": {
-        "discord.js": "^12.2.0",
-        "discord.js-commando": "^0.12.3",
-        "node-fetch": "^2.6.7",
-        "node-schedule": "^1.3.2",
-        "r2": "^2.0.1",
-        "rxjs": "^6.6.3"
-    },
-    "devDependencies": {
-        "eslint": "^7.14.0",
-        "eslint-config-standard": "^16.0.2",
-        "eslint-plugin-import": "^2.22.1",
-        "eslint-plugin-node": "^11.1.0",
-        "eslint-plugin-promise": "^4.2.1"
-    }
+  "name": "madeline",
+  "version": "1.0.0",
+  "description": "Madeline the discord bot.",
+  "main": "./src/index.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GeraldRosati/Madeline.git"
+  },
+  "keywords": [
+    "discord",
+    "bot"
+  ],
+  "author": "Jerry Rosati",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/GeraldRosati/Madeline/issues"
+  },
+  "homepage": "https://github.com/GeraldRosati/Madeline#readme",
+  "dependencies": {
+    "@discordjs/builders": "^0.12.0",
+    "@discordjs/rest": "^0.3.0",
+    "discord-api-types": "^0.27.2",
+    "discord.js": "^13.6.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.9.0"
+  }
 }
