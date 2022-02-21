@@ -32,15 +32,16 @@ const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
 
 client.commands = new Collection();
 
-const commandFiles = fs.readdirSync('./src/commands').filter(file => file.endsWith('.js'));
-// const commandFiles = gatherJsFiles('./src/commands');
+// const commandFiles = fs.readdirSync('./src/commands').filter(file => file.endsWith('.js'));
+const commandFiles = gatherJsFiles('./src/commands');
 
+console.log('Found the following files:');
 for (const file of commandFiles) {
-    const command = require(`./commands/${file}`);
+    console.log(`./../${file}`);
+    const command = require(`./../${file}`);
     client.commands.set(command.data.name, command);
 }
 
-console.log('Found the following files:');
 commandFiles.forEach(name => console.log(name));
 
 // Search for all the events.
